@@ -1,6 +1,6 @@
 import QRCodeCanvas from '../components/QRCodeCanvas'
 import { useLang } from '../context/LanguageProvider'
-import { fmt, txLabel } from '../lib/i18n'
+import { fmt, txLabel, formatShortCode } from '../lib/i18n'
 
 const serif = { fontFamily: "Georgia,'Noto Serif SC',serif" }
 const panel = { background: '#1f1915', border: '1px solid #32281f', borderRadius: 16, padding: 16 }
@@ -39,8 +39,11 @@ export default function CardPage({ member, txs, stores, rewards, config }) {
             <div style={{ ...serif, fontSize: 19, color: '#fff' }}>
               {member.display_name || member.email}
             </div>
-            <div style={{ fontSize: 11, color: 'rgba(255,255,255,.75)', letterSpacing: 1, marginTop: 2 }}>
+            <div style={{ fontSize: 11, color: 'rgba(255,255,255,.55)', letterSpacing: 1, marginTop: 2 }}>
               {member.card_number}
+            </div>
+            <div style={{ ...serif, fontSize: 17, color: '#fff', letterSpacing: 3, marginTop: 4 }}>
+              {formatShortCode(member.card_number)}
             </div>
           </div>
           <span style={{ ...serif, background: 'rgba(0,0,0,.35)', color: '#fff',

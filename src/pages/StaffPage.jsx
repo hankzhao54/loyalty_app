@@ -3,6 +3,7 @@ import { supabase } from '../lib/supabase'
 import { useLang } from '../context/LanguageProvider'
 import { useToast } from '../context/ToastProvider'
 import QrScanner from '../components/QrScanner'
+import { expandShortCode } from '../lib/i18n'
 
 const serif = { fontFamily: "Georgia,'Noto Serif SC',serif" }
 const panel = { background: '#1f1915', border: '1px solid #32281f', borderRadius: 16, padding: 16 }
@@ -29,7 +30,7 @@ export default function StaffPage({ stores, reload }) {
     if (!card || !amount || !storeId) return
     setBusy(true)
     const { data, error } = await supabase.rpc('record_purchase', {
-      p_card_number: card.trim(),
+      p_card_number: expandShortCode(card),
       p_amount_huf: parseInt(amount, 10),
       p_store_id: storeId,
       p_lunch: lunch,

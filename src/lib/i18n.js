@@ -45,7 +45,7 @@ export const T = {
     },
     staff: {
       title: 'Record a purchase',
-      cardNumber: 'Member card number',
+      cardNumber: 'Card number (e.g. 26000128)',
       amount: 'Amount (HUF)',
       store: 'Location',
       lunch: 'Includes a lunch set (adds a stamp)',
@@ -109,7 +109,7 @@ export const T = {
     },
     staff: {
       title: 'Vásárlás rögzítése',
-      cardNumber: 'Tagsági kártyaszám',
+      cardNumber: 'Kártyaszám (pl. 26000128)',
       amount: 'Összeg (HUF)',
       store: 'Étterem',
       lunch: 'Ebédmenüt tartalmaz (pecsétet ad)',
@@ -173,7 +173,7 @@ export const T = {
     },
     staff: {
       title: '录入消费',
-      cardNumber: '会员卡号',
+      cardNumber: '会员卡号(如 26000128)',
       amount: '消费金额(HUF)',
       store: '门店',
       lunch: '包含午市套餐(触发盖章)',
@@ -212,4 +212,33 @@ export function txLabel(tx, t, lang, stores, rewards) {
     return t.txRedeem(r ? r.name[lang] || r.name.en : '')
   }
   return tx.note || tx.type
+}
+
+/* ---- 卡号短码互转 ----
+   全卡号: LY-2026-000128 (数据库存储,被多表引用,不改)
+   短码:   26000128       (年份后两位 + 6 位序号,店员手输/顾客口报)
+   显示时分组为 "26 000128" 更易读 */
+export function toShortCode(cardNumber) {
+  if (!cardNumber) return ''
+  const m = cardNumber.match(/LY-(\d{2})(\d{2})-(\d{6})/)
+  return m ? m[2] + m[3] : cardNumber // 26 + 000128
+}
+
+export function formatShortCode(cardNumber) {
+  const s = toShortCode(cardNumber)
+  return s.length === 8 ? `${s.slice(0, 2)} ${s.slice(2)}` : s // "26 000128"
+}
+
+/* 店员输入的短码 -> 全卡号(用于查库)。
+   接受 8 位(26000128)或带空格(26 000128);
+   也兼容店员直接输/扫到完整 LY- 卡号。 */
+export function expandShortCode(input) {
+  const raw = (input || '').trim().toUpperCase().replace(/\s+/g, '')
+  const full = raw.match(/LY-\d{4}-\d{6}/)
+  if (full) return full[0]
+  const digits = raw.replace(/\D/g, '')
+  if (digits.length === 8) {
+    return `LY-20${digits.slice(0, 2)}-${digits.slice(2)}`
+  }
+  return raw // 交给后端报"未找到",避免静默猜测
 }
