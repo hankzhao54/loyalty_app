@@ -5,7 +5,7 @@ import { supabase } from './supabase'
 export function useLoyalty(user) {
   const [data, setData] = useState({
     member: null, txs: [], stores: [], rewards: [], redemptions: [],
-    campaigns: [], progress: [], config: {}, isStaff: false, ready: false,
+    campaigns: [], progress: [], config: {}, isStaff: false, isManager: false, ready: false,
   })
 
   const reload = useCallback(async () => {
@@ -15,7 +15,7 @@ export function useLoyalty(user) {
       supabase.from('stores').select('*').eq('active', true).order('name'),
       supabase.from('rewards').select('*').eq('active', true).order('sort_order'),
       supabase.from('config').select('*'),
-      supabase.from('staff').select('auth_user_id').eq('auth_user_id', user.id).maybeSingle(),
+      supabase.from('staff').select('auth_user_id, role').eq('auth_user_id', user.id).maybeSingle(),
     ])
 
     const member = m.data
@@ -38,7 +38,7 @@ export function useLoyalty(user) {
     const config = Object.fromEntries((cf.data || []).map((r) => [r.key, r.value]))
     setData({
       member, txs, stores: st.data || [], rewards: rw.data || [],
-      redemptions, campaigns, progress, config, isStaff: !!sf.data, ready: true,
+      redemptions, campaigns, progress, config, isStaff: !!sf.data, isManager: sf.data?.role === 'manager', ready: true,
     })
   }, [user])
 

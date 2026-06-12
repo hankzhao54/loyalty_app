@@ -1,4 +1,6 @@
+import { useState } from 'react'
 import QRCodeCanvas from '../components/QRCodeCanvas'
+import QrFullscreen from '../components/QrFullscreen'
 import { useLang } from '../context/LanguageProvider'
 import { fmt, txLabel, formatShortCode } from '../lib/i18n'
 
@@ -14,6 +16,7 @@ const TIER_ORDER = ['silver', 'jade', 'gold']
 
 export default function CardPage({ member, txs, stores, rewards, config }) {
   const { t, lang } = useLang()
+  const [qrOpen, setQrOpen] = useState(false)
   const thresholds = config.tier_thresholds || { silver: 0, jade: 300, gold: 800 }
   const multipliers = config.tier_multipliers || { silver: 1, jade: 1.1, gold: 1.2 }
 
@@ -59,7 +62,8 @@ export default function CardPage({ member, txs, stores, rewards, config }) {
               {fmt(member.points_balance)}
             </div>
           </div>
-          <div style={{ background: '#fff', borderRadius: 10, padding: 4 }}>
+          <div onClick={() => setQrOpen(true)}
+               style={{ background: '#fff', borderRadius: 10, padding: 4, cursor: 'pointer' }}>
             <QRCodeCanvas value={member.card_number} size={88} />
           </div>
         </div>
@@ -103,6 +107,9 @@ export default function CardPage({ member, txs, stores, rewards, config }) {
           </div>
         ))}
       </div>
+      {qrOpen && (
+        <QrFullscreen cardNumber={member.card_number} onClose={() => setQrOpen(false)} />
+      )}
     </div>
   )
 }

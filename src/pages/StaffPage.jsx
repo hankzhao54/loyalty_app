@@ -21,10 +21,10 @@ export default function StaffPage({ stores, reload }) {
   const [card, setCard] = useState('')
   const [amount, setAmount] = useState('')
   const [storeId, setStoreId] = useState(stores[0]?.id || '')
-  const [lunch, setLunch] = useState(false)
   const [code, setCode] = useState('')
   const [busy, setBusy] = useState(false)
   const [scan, setScan] = useState(null) // 'card' | 'code' | null
+  const [result, setResult] = useState(null) // 录入成功结果卡片
 
   async function record() {
     if (!card || !amount || !storeId) return
@@ -33,15 +33,12 @@ export default function StaffPage({ stores, reload }) {
       p_card_number: expandShortCode(card),
       p_amount_huf: parseInt(amount, 10),
       p_store_id: storeId,
-      p_lunch: lunch,
+      p_lunch: false,
     })
     if (error) toast(error.message)
     else {
-      toast(t.staff.recorded(data.points_earned, data.new_balance))
-      if (data.tier_upgraded) toast(t.staff.upgraded(t.tiers[data.tier_after]))
-      if (data.stamp_completed) toast(t.staff.stampDone)
-      if (data.challenge_completed) toast(t.staff.challengeDone)
-      setAmount(''); setLunch(false); setCard('')
+      setResult(data)
+      setAmount(''); setCard('')
       await reload()
     }
     setBusy(false)
@@ -74,6 +71,42 @@ export default function StaffPage({ stores, reload }) {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+      {result && (
+        <div style={{ ...panel, border: '1px solid #7fbf9a55', background: '#16201a' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <span style={{ ...serif, fontSize: 15, color: '#7fbf9a' }}>✓ {t.staff.resultTitle}</span>
+            <button onClick={() => setResult(null)}
+                    style={{ color: '#a89c89', fontSize: 13 }}>{t.staff.dismiss}</button>
+          </div>
+          <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, marginTop: 10 }}>
+            <span style={{ ...serif, fontSize: 34, color: '#7fbf9a' }}>+{result.points_earned}</span>
+            <span style={{ fontSize: 13, color: '#a89c89' }}>{t.staff.resultEarned}</span>
+          </div>
+          <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 6, fontSize: 14 }}>
+            <span style={{ color: '#a89c89' }}>{t.staff.resultBalance}</span>
+            <span style={serif}>{result.new_balance}</span>
+          </div>
+          <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 4, fontSize: 14 }}>
+            <span style={{ color: '#a89c89' }}>{t.staff.resultTier}</span>
+            <span style={serif}>
+              {t.tiers[result.tier_after]}
+              {result.tier_upgraded && <span style={{ color: '#c9a14f' }}> · {t.staff.resultUpgrade}</span>}
+            </span>
+          </div>
+          {(result.stamp_completed || result.challenge_completed) && (
+            <div style={{ marginTop: 8, display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+              {result.stamp_completed && (
+                <span style={{ fontSize: 12, color: '#c9a14f', background: '#2b231c',
+                               padding: '4px 10px', borderRadius: 999 }}>{t.staff.resultStampDone}</span>
+              )}
+              {result.challenge_completed && (
+                <span style={{ fontSize: 12, color: '#c9a14f', background: '#2b231c',
+                               padding: '4px 10px', borderRadius: 999 }}>{t.staff.resultChallenge}</span>
+              )}
+            </div>
+          )}
+        </div>
+      )}
       {/* 录入消费 */}
       <div style={panel}>
         <div style={{ ...serif, fontSize: 15, marginBottom: 12 }}>{t.staff.title}</div>
@@ -88,11 +121,6 @@ export default function StaffPage({ stores, reload }) {
           <select value={storeId} onChange={(e) => setStoreId(e.target.value)}>
             {stores.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
           </select>
-          <label style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 14 }}>
-            <input type="checkbox" style={{ width: 'auto' }} checked={lunch}
-                   onChange={(e) => setLunch(e.target.checked)} />
-            {t.staff.lunch}
-          </label>
           <button onClick={record} disabled={busy} style={{
             background: '#b8392e', color: '#fff', padding: '12px 0',
             borderRadius: 12, ...serif, fontSize: 15, opacity: busy ? 0.6 : 1,

@@ -8,6 +8,7 @@ import CardPage from './pages/CardPage'
 import RewardsPage from './pages/RewardsPage'
 import StampsPage from './pages/StampsPage'
 import StaffPage from './pages/StaffPage'
+import AdminPage from './pages/AdminPage'
 
 const serif = { fontFamily: "Georgia,'Noto Serif SC',serif" }
 
@@ -23,7 +24,9 @@ function Shell() {
 
   // 店员账号被删除会员行后,只显示店员页
   const memberTabs = data.member ? ['card', 'rewards', 'stamps'] : []
-  const tabs = data.isStaff ? [...memberTabs, 'staff'] : memberTabs
+  const staffTabs = data.isStaff ? ['staff'] : []
+  const adminTabs = data.isManager ? ['admin'] : []
+  const tabs = [...memberTabs, ...staffTabs, ...adminTabs]
   const active = tabs.includes(tab) ? tab : tabs[0]
 
   if (tabs.length === 0) return (
@@ -62,6 +65,7 @@ function Shell() {
         {active === 'rewards' && <RewardsPage {...data} />}
         {active === 'stamps'  && <StampsPage {...data} />}
         {active === 'staff'   && <StaffPage {...data} />}
+        {active === 'admin'   && <AdminPage />}
       </main>
 
       <nav style={{ position: 'fixed', bottom: 0, left: '50%', transform: 'translateX(-50%)',
