@@ -83,6 +83,11 @@ export default function StaffPage({ stores, reload }) {
           <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, marginTop: 10 }}>
             <span style={{ ...serif, fontSize: 34, color: '#7fbf9a' }}>+{result.points_earned}</span>
             <span style={{ fontSize: 13, color: '#a89c89' }}>{t.staff.resultEarned}</span>
+            {result.signup_bonus > 0 && (
+              <span style={{ fontSize: 12, color: '#c9a14f' }}>
+                (+{result.signup_bonus} {t.staff.resultSignup})
+              </span>
+            )}
           </div>
           <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 6, fontSize: 14 }}>
             <span style={{ color: '#a89c89' }}>{t.staff.resultBalance}</span>
