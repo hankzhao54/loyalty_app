@@ -3,6 +3,7 @@ import { supabase } from '../lib/supabase'
 import { useLang } from '../context/LanguageProvider'
 import { useToast } from '../context/ToastProvider'
 import QrScanner from '../components/QrScanner'
+import TodayStats from '../components/TodayStats'
 import { expandShortCode } from '../lib/i18n'
 
 const serif = { fontFamily: "Georgia,'Noto Serif SC',serif" }
@@ -71,6 +72,7 @@ export default function StaffPage({ stores, reload }) {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+      <TodayStats />
       {result && (
         <div style={{ ...panel, border: '1px solid #7fbf9a55', background: '#16201a' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>

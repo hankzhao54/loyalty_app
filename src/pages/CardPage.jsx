@@ -14,7 +14,7 @@ const TIER_STYLE = {
 }
 const TIER_ORDER = ['silver', 'jade', 'gold']
 
-export default function CardPage({ member, txs, stores, rewards, config }) {
+export default function CardPage({ member, txs, stores, rewards, config, expiring, expiringDate }) {
   const { t, lang } = useLang()
   const [qrOpen, setQrOpen] = useState(false)
   const thresholds = config.tier_thresholds || { silver: 0, jade: 300, gold: 800 }
@@ -70,6 +70,13 @@ export default function CardPage({ member, txs, stores, rewards, config }) {
         <div style={{ fontSize: 10, color: 'rgba(255,255,255,.65)', marginTop: 6 }}>{t.showCode}</div>
       </div>
 
+      {expiring > 0 && (
+        <div style={{ background: '#2a1f12', border: '1px solid #c9a14f55',
+                      borderRadius: 12, padding: '10px 14px', fontSize: 13, color: '#d8b878' }}>
+          ⏳ {t.expiringSoon(expiring, new Date(expiringDate).toLocaleDateString(
+                lang === 'zh' ? 'zh-CN' : lang === 'hu' ? 'hu-HU' : 'en-GB'))}
+        </div>
+      )}
       <div style={panel}>
         <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 14 }}>
           <span style={{ color: '#a89c89' }}>{t.tierProgress}</span>

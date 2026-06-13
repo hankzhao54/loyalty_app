@@ -5,7 +5,8 @@ import { supabase } from './supabase'
 export function useLoyalty(user) {
   const [data, setData] = useState({
     member: null, txs: [], stores: [], rewards: [], redemptions: [],
-    campaigns: [], progress: [], config: {}, isStaff: false, isManager: false, ready: false,
+    campaigns: [], progress: [], config: {}, isStaff: false, isManager: false,
+    expiring: 0, expiringDate: null, ready: false,
   })
 
   const reload = useCallback(async () => {
@@ -20,6 +21,7 @@ export function useLoyalty(user) {
 
     const member = m.data
     let txs = [], redemptions = [], campaigns = [], progress = []
+    let expiring = 0, expiringDate = null
     if (member) {
       const [t1, r1, c1, p1] = await Promise.all([
         supabase.from('point_transactions').select('*')
@@ -33,12 +35,26 @@ export function useLoyalty(user) {
       redemptions = r1.data || []
       campaigns = c1.data || []
       progress = p1.data || []
+
+      // 60 天内即将过期的 earn 积分合计(给会员卡提醒用)
+      const soon = new Date(Date.now() + 60 * 86400000).toISOString()
+      const { data: exp } = await supabase
+        .from('point_transactions')
+        .select('points, expires_at')
+        .eq('member_id', member.id)
+        .eq('type', 'earn')
+        .not('expires_at', 'is', null)
+        .lte('expires_at', soon)
+        .gt('expires_at', new Date().toISOString())
+      expiring = (exp || []).reduce((sum, r) => sum + r.points, 0)
+      expiringDate = (exp || []).map(r => r.expires_at).sort()[0] || null
     }
 
     const config = Object.fromEntries((cf.data || []).map((r) => [r.key, r.value]))
     setData({
       member, txs, stores: st.data || [], rewards: rw.data || [],
-      redemptions, campaigns, progress, config, isStaff: !!sf.data, isManager: sf.data?.role === 'manager', ready: true,
+      redemptions, campaigns, progress, config, isStaff: !!sf.data,
+      isManager: sf.data?.role === 'manager', expiring, expiringDate, ready: true,
     })
   }, [user])
 
