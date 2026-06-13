@@ -30,7 +30,8 @@ export default function Login() {
   return (
     <div style={{ minHeight: '100%', display: 'flex', flexDirection: 'column',
                   alignItems: 'center', justifyContent: 'center', padding: 24 }}>
-      <div style={{ position: 'absolute', top: 20, right: 20, display: 'flex', gap: 4 }}>
+      <div style={{ position: 'absolute', top: 'max(20px, calc(env(safe-area-inset-top) + 8px))',
+                    right: 'max(20px, env(safe-area-inset-right))', display: 'flex', gap: 4 }}>
         {[['en', 'EN'], ['hu', 'HU'], ['zh', '中']].map(([k, label]) => (
           <button key={k} onClick={() => setLang(k)} style={{
             padding: '4px 8px', borderRadius: 6, fontSize: 12,

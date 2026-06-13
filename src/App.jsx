@@ -41,13 +41,17 @@ function Shell() {
   return (
     <div style={{ maxWidth: 448, margin: '0 auto', minHeight: '100%',
                   display: 'flex', flexDirection: 'column', background: '#171210' }}>
-      <header style={{ padding: '24px 20px 12px', display: 'flex',
-                       justifyContent: 'space-between', alignItems: 'flex-start' }}>
-        <div>
+      <header style={{
+        paddingTop: 'max(24px, calc(env(safe-area-inset-top) + 12px))',
+        paddingLeft: 'max(20px, env(safe-area-inset-left))',
+        paddingRight: 'max(20px, env(safe-area-inset-right))',
+        paddingBottom: 12, display: 'flex',
+        justifyContent: 'space-between', alignItems: 'flex-start', gap: 12 }}>
+        <div style={{ minWidth: 0 }}>
           <div style={{ ...serif, fontSize: 20, letterSpacing: 1.5 }}>{t.brand}</div>
           <div style={{ color: '#a89c89', fontSize: 12, marginTop: 2 }}>{t.sub}</div>
         </div>
-        <div style={{ display: 'flex', gap: 4, alignItems: 'center' }}>
+        <div style={{ display: 'flex', gap: 4, alignItems: 'center', flexShrink: 0 }}>
           {[['en', 'EN'], ['hu', 'HU'], ['zh', '中']].map(([k, label]) => (
             <button key={k} onClick={() => setLang(k)} style={{
               padding: '4px 8px', borderRadius: 6, fontSize: 12,
@@ -60,7 +64,10 @@ function Shell() {
         </div>
       </header>
 
-      <main style={{ flex: 1, overflowY: 'auto', padding: '0 20px 110px' }}>
+      <main style={{ flex: 1, overflowY: 'auto',
+        paddingLeft: 'max(20px, env(safe-area-inset-left))',
+        paddingRight: 'max(20px, env(safe-area-inset-right))',
+        paddingBottom: 110 }}>
         {active === 'card'    && <CardPage {...data} />}
         {active === 'rewards' && <RewardsPage {...data} />}
         {active === 'stamps'  && <StampsPage {...data} />}
@@ -71,7 +78,9 @@ function Shell() {
       <nav style={{ position: 'fixed', bottom: 0, left: '50%', transform: 'translateX(-50%)',
                     width: '100%', maxWidth: 448, display: 'flex',
                     background: '#1c1612', borderTop: '1px solid #2b231c',
-                    paddingBottom: 'env(safe-area-inset-bottom)' }}>
+                    paddingBottom: 'env(safe-area-inset-bottom)',
+                    paddingLeft: 'env(safe-area-inset-left)',
+                    paddingRight: 'env(safe-area-inset-right)' }}>
         {tabs.map((k) => (
           <button key={k} onClick={() => setTab(k)} style={{
             ...serif, flex: 1, padding: '16px 0', fontSize: 14, letterSpacing: 2,
