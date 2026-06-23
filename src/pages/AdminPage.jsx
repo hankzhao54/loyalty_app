@@ -3,6 +3,7 @@ import { supabase } from '../lib/supabase'
 import { useLang } from '../context/LanguageProvider'
 import { useToast } from '../context/ToastProvider'
 import { fmt } from '../lib/i18n'
+import MemberOverview from '../components/MemberOverview'
 
 const serif = { fontFamily: "Georgia,'Noto Serif SC',serif" }
 const panel = { background: '#1f1915', border: '1px solid #32281f', borderRadius: 16, padding: 16 }
@@ -23,6 +24,7 @@ const emptyForm = () => ({
 export default function AdminPage() {
   const { t, lang } = useLang()
   const toast = useToast()
+  const [view, setView] = useState('rewards')
   const [rewards, setRewards] = useState([])
   const [form, setForm] = useState(emptyForm())
   const [editing, setEditing] = useState(false)
@@ -94,6 +96,20 @@ export default function AdminPage() {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+      <div style={{ display: 'flex', gap: 8 }}>
+        {[['rewards', t.admin.tabRewards], ['members', t.admin.tabMembers]].map(([k, label]) => (
+          <button key={k} onClick={() => setView(k)} style={{
+            flex: 1, padding: '8px 0', borderRadius: 10, fontSize: 14,
+            fontFamily: "Georgia,serif",
+            background: view === k ? '#c9a14f' : '#2b231c',
+            color: view === k ? '#171210' : '#a89c89',
+          }}>{label}</button>
+        ))}
+      </div>
+
+      {view === 'members' && <MemberOverview />}
+
+      {view === 'rewards' && <>
       {/* 编辑表单 */}
       <div style={panel}>
         <div style={{ ...serif, fontSize: 15, marginBottom: 12 }}>
@@ -188,6 +204,7 @@ export default function AdminPage() {
           </div>
         ))}
       </div>
+      </>}
     </div>
   )
 }
