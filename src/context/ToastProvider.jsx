@@ -1,9 +1,11 @@
 import { createContext, useContext, useState, useCallback } from 'react'
+import { useTheme } from './ThemeProvider'
 
 const ToastCtx = createContext(null)
 
 export function ToastProvider({ children }) {
   const [toasts, setToasts] = useState([])
+  const { c } = useTheme()
 
   const toast = useCallback((msg) => {
     const id = Date.now() + Math.random()
@@ -21,7 +23,7 @@ export function ToastProvider({ children }) {
       }}>
         {toasts.map((x) => (
           <div key={x.id} style={{
-            background: '#2b231c', border: '1px solid #c9a14f66', color: '#ece4d6',
+            background: c.text, border: `1px solid ${c.text}`, color: c.bg,
             padding: '8px 16px', borderRadius: 999, fontSize: 14,
             boxShadow: '0 4px 16px rgba(0,0,0,.4)',
           }}>

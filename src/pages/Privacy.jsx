@@ -1,6 +1,6 @@
 import { useLang } from '../context/LanguageProvider'
+import { useTheme, FONT } from '../context/ThemeProvider'
 
-const serif = { fontFamily: "Georgia,'Noto Serif SC',serif" }
 
 /* 隐私政策模板页。【】内为占位,上线前由商家/顾问补全并经法务确认。
    三语内容集中在此,便于统一维护。 */
@@ -51,19 +51,20 @@ const CONTENT = {
 
 export default function Privacy({ onBack }) {
   const { lang } = useLang()
+  const { c: T } = useTheme()
   const c = CONTENT[lang] || CONTENT.en
 
   return (
-    <div style={{ padding: '24px 4px 60px', maxWidth: 600, margin: '0 auto' }}>
-      <button onClick={onBack} style={{ color: '#c9a14f', fontSize: 14, marginBottom: 16 }}>
+    <div style={{ minHeight: '100vh', padding: '24px 20px 60px', maxWidth: 600, margin: '0 auto', background: T.bg, color: T.text, fontFamily: FONT.body }}>
+      <button onClick={onBack} style={{ color: T.accent, fontSize: 14, marginBottom: 16 }}>
         ‹ {c.title}
       </button>
-      <div style={{ ...serif, fontSize: 24, marginBottom: 4 }}>{c.title}</div>
-      <div style={{ fontSize: 12, color: '#a89c89', marginBottom: 20 }}>{c.updated}</div>
+      <div style={{ fontFamily: FONT.display, fontWeight: 700, fontSize: 24, marginBottom: 4 }}>{c.title}</div>
+      <div style={{ fontSize: 12, color: T.muted, marginBottom: 20 }}>{c.updated}</div>
       {c.body.map(([h, p], i) => (
         <div key={i} style={{ marginBottom: 18 }}>
-          <div style={{ ...serif, fontSize: 15, color: '#c9a14f', marginBottom: 4 }}>{h}</div>
-          <div style={{ fontSize: 14, lineHeight: 1.6, color: '#d8cdbb' }}>{p}</div>
+          <div style={{ fontFamily: FONT.display, fontWeight: 700, fontSize: 15, color: T.accent, marginBottom: 4 }}>{h}</div>
+          <div style={{ fontSize: 14, lineHeight: 1.6, color: T.text }}>{p}</div>
         </div>
       ))}
     </div>

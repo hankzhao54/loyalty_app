@@ -2,20 +2,15 @@ import { useState } from 'react'
 import QRCodeCanvas from '../components/QRCodeCanvas'
 import QrFullscreen from '../components/QrFullscreen'
 import { useLang } from '../context/LanguageProvider'
+import { useTheme, FONT } from '../context/ThemeProvider'
 import { fmt, txLabel, formatShortCode } from '../lib/i18n'
 
-const serif = { fontFamily: "Georgia,'Noto Serif SC',serif" }
-const panel = { background: '#1f1915', border: '1px solid #32281f', borderRadius: 16, padding: 16 }
-
-const TIER_STYLE = {
-  silver: { grad: 'linear-gradient(135deg,#454c56 0%,#8d97a3 60%,#6b7480 100%)', chip: '#9aa3ad' },
-  jade:   { grad: 'linear-gradient(135deg,#0e3f30 0%,#2e8b6b 60%,#1b5e47 100%)', chip: '#46b08a' },
-  gold:   { grad: 'linear-gradient(135deg,#6e5418 0%,#d4af37 55%,#9a7b2d 100%)', chip: '#d4af37' },
-}
 const TIER_ORDER = ['silver', 'jade', 'gold']
+const dateLoc = (lang) => (lang === 'hu' ? 'hu-HU' : 'en-GB')
 
 export default function CardPage({ member, txs, stores, rewards, config, expiring, expiringDate }) {
   const { t, lang } = useLang()
+  const { c } = useTheme()
   const [qrOpen, setQrOpen] = useState(false)
   const thresholds = config.tier_thresholds || { silver: 0, jade: 300, gold: 800 }
   const multipliers = config.tier_multipliers || { silver: 1, jade: 1.1, gold: 1.2 }
@@ -27,93 +22,114 @@ export default function CardPage({ member, txs, stores, rewards, config, expirin
   const pct = nextId
     ? Math.min(100, Math.round(((member.tier_points - curMin) / (nextMin - curMin)) * 100))
     : 100
-  const style = TIER_STYLE[member.tier]
+
+  const panel = { background: c.surface, border: `1px solid ${c.line}`, borderRadius: 22, padding: 18 }
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-      <div style={{ borderRadius: 16, padding: 20, position: 'relative',
-                    overflow: 'hidden', minHeight: 190, background: style.grad }}>
-        <div style={{ ...serif, position: 'absolute', right: -16, bottom: -32,
-                      fontSize: 110, fontStyle: 'italic',
-                      color: 'rgba(255,255,255,.08)', lineHeight: 1,
+      {/* 会员卡 */}
+      <div style={{ borderRadius: 28, padding: 22, position: 'relative',
+                    overflow: 'hidden', minHeight: 196, background: c.cardBg }}>
+        {/* 装饰圆 + 101 水印 */}
+        <div style={{ position: 'absolute', left: -40, bottom: -40, width: 150, height: 150,
+                      borderRadius: '50%', background: 'rgba(255,255,255,.13)',
+                      pointerEvents: 'none' }} />
+        <div style={{ position: 'absolute', right: 8, bottom: -10,
+                      fontFamily: FONT.display, fontWeight: 700, fontSize: 80,
+                      color: 'rgba(255,255,255,.13)', lineHeight: 1,
                       userSelect: 'none', pointerEvents: 'none' }}>101</div>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-          <div>
-            <div style={{ ...serif, fontSize: 19, color: '#fff' }}>
+
+        <div style={{ display: 'flex', justifyContent: 'space-between',
+                      alignItems: 'flex-start', position: 'relative' }}>
+          <div style={{ minWidth: 0 }}>
+            <div style={{ fontSize: 15, fontWeight: 700, color: c.cardText }}>
               {member.display_name || member.email}
             </div>
-            <div style={{ fontSize: 11, color: 'rgba(255,255,255,.55)', letterSpacing: 1, marginTop: 2 }}>
+            <div style={{ fontFamily: FONT.mono, fontSize: 12, color: c.cardMuted, marginTop: 3 }}>
               {member.card_number}
             </div>
-            <div style={{ ...serif, fontSize: 17, color: '#fff', letterSpacing: 3, marginTop: 4 }}>
+            <div style={{ fontFamily: FONT.display, fontWeight: 700, fontSize: 18,
+                          color: c.cardText, letterSpacing: 2, marginTop: 4 }}>
               {formatShortCode(member.card_number)}
             </div>
           </div>
-          <span style={{ ...serif, background: 'rgba(0,0,0,.35)', color: '#fff',
-                         padding: '4px 12px', borderRadius: 999, fontSize: 12, letterSpacing: 1.5 }}>
+          <span style={{ background: c.badgeBg, color: c.badgeText, fontWeight: 700,
+                         padding: '4px 12px', borderRadius: 999, fontSize: 12, flexShrink: 0 }}>
             {t.tiers[member.tier]}
           </span>
         </div>
+
         <div style={{ display: 'flex', justifyContent: 'space-between',
-                      alignItems: 'flex-end', marginTop: 20 }}>
-          <div>
-            <div style={{ fontSize: 11, color: 'rgba(255,255,255,.7)' }}>{t.availablePoints}</div>
-            <div style={{ ...serif, fontSize: 40, color: '#fff', lineHeight: 1.1 }}>
+                      alignItems: 'flex-end', marginTop: 18, position: 'relative' }}>
+          <div style={{ minWidth: 0 }}>
+            <div style={{ fontSize: 12, color: c.cardMuted }}>{t.availablePoints}</div>
+            <div style={{ fontFamily: FONT.display, fontWeight: 700, fontSize: 48,
+                          color: c.cardText, lineHeight: 1.05, letterSpacing: '-1px' }}>
               {fmt(member.points_balance)}
             </div>
+            <div style={{ fontSize: 11, color: c.cardMuted, marginTop: 2 }}>{t.showCode}</div>
           </div>
           <div onClick={() => setQrOpen(true)}
-               style={{ background: '#fff', borderRadius: 10, padding: 4, cursor: 'pointer' }}>
+               style={{ background: '#fff', borderRadius: 12, padding: 7,
+                        cursor: 'pointer', flexShrink: 0 }}>
             <QRCodeCanvas value={member.card_number} size={88} />
           </div>
         </div>
-        <div style={{ fontSize: 10, color: 'rgba(255,255,255,.65)', marginTop: 6 }}>{t.showCode}</div>
       </div>
 
+      {/* 积分过期提醒 */}
       {expiring > 0 && (
-        <div style={{ background: '#2a1f12', border: '1px solid #c9a14f55',
-                      borderRadius: 12, padding: '10px 14px', fontSize: 13, color: '#d8b878' }}>
-          ⏳ {t.expiringSoon(expiring, new Date(expiringDate).toLocaleDateString(
-                lang === 'zh' ? 'zh-CN' : lang === 'hu' ? 'hu-HU' : 'en-GB'))}
+        <div style={{ background: c.surface, border: `1px solid ${c.accent}`,
+                      borderRadius: 16, padding: '11px 14px', fontSize: 13, color: c.accent }}>
+          ⏳ {t.expiringSoon(expiring, new Date(expiringDate).toLocaleDateString(dateLoc(lang)))}
         </div>
       )}
+
+      {/* 年度定级 */}
       <div style={panel}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 14 }}>
-          <span style={{ color: '#a89c89' }}>{t.tierProgress}</span>
-          <span style={serif}>{fmt(member.tier_points)}{nextId ? ` / ${fmt(nextMin)}` : ''}</span>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: 14 }}>
+          <span style={{ color: c.muted }}>{t.tierProgress}</span>
+          <span style={{ fontFamily: FONT.display, fontWeight: 700, fontSize: 18, color: c.accent }}>
+            {fmt(member.tier_points)}{nextId ? ` / ${fmt(nextMin)}` : ''}
+          </span>
         </div>
-        <div style={{ height: 8, borderRadius: 999, marginTop: 8,
-                      background: '#2b231c', overflow: 'hidden' }}>
-          <div style={{ height: '100%', borderRadius: 999, width: pct + '%',
-                        background: nextId ? TIER_STYLE[nextId].chip : '#c9a14f',
-                        transition: 'width .5s' }} />
+        <div style={{ height: 8, borderRadius: 8, marginTop: 10,
+                      background: c.line, overflow: 'hidden' }}>
+          <div style={{ height: '100%', borderRadius: 8, width: pct + '%',
+                        background: c.accent, transition: 'width .5s' }} />
         </div>
-        <div style={{ fontSize: 12, color: '#a89c89', marginTop: 8 }}>
+        <div style={{ fontSize: 12, color: c.muted, marginTop: 8 }}>
           {nextId
             ? t.toNext(fmt(nextMin - member.tier_points), t.tiers[nextId], multipliers[nextId])
             : t.maxTier}
         </div>
       </div>
 
-      <div style={panel}>
-        <div style={{ ...serif, fontSize: 15, marginBottom: 10 }}>{t.recent}</div>
-        {txs.map((tx) => (
-          <div key={tx.id} style={{ display: 'flex', justifyContent: 'space-between',
-                                    alignItems: 'center', padding: '8px 0',
-                                    borderTop: '1px solid #2b231c', fontSize: 13 }}>
-            <div>
-              <div>{txLabel(tx, t, lang, stores, rewards)}</div>
-              <div style={{ color: '#a89c89', fontSize: 11 }}>
-                {new Date(tx.created_at).toLocaleDateString(
-                  lang === 'zh' ? 'zh-CN' : lang === 'hu' ? 'hu-HU' : 'en-GB')}
+      {/* 最近活动 */}
+      <div>
+        <div style={{ fontSize: 15, fontWeight: 700, marginBottom: 10, color: c.text }}>{t.recent}</div>
+        <div style={panel}>
+          {txs.map((tx, i) => (
+            <div key={tx.id} style={{ display: 'flex', justifyContent: 'space-between',
+                                      alignItems: 'center', padding: '11px 0',
+                                      borderTop: i === 0 ? 'none' : `1px solid ${c.lineInner}` }}>
+              <div style={{ minWidth: 0 }}>
+                <div style={{ fontSize: 14, fontWeight: 600, color: c.text }}>
+                  {txLabel(tx, t, lang, stores, rewards)}
+                </div>
+                <div style={{ fontFamily: FONT.mono, color: c.mutedList, fontSize: 11, marginTop: 2 }}>
+                  {new Date(tx.created_at).toLocaleDateString(dateLoc(lang))}
+                </div>
               </div>
+              <span style={{ fontFamily: FONT.display, fontWeight: 700, fontSize: 15,
+                             color: tx.points > 0 ? c.green : c.danger, flexShrink: 0 }}>
+                {tx.points > 0 ? '+' : ''}{tx.points}
+              </span>
             </div>
-            <span style={{ ...serif, color: tx.points > 0 ? '#7fbf9a' : '#b8392e' }}>
-              {tx.points > 0 ? '+' : ''}{tx.points}
-            </span>
-          </div>
-        ))}
+          ))}
+        </div>
       </div>
+
       {qrOpen && (
         <QrFullscreen cardNumber={member.card_number} onClose={() => setQrOpen(false)} />
       )}

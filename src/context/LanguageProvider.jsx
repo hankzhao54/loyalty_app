@@ -7,7 +7,7 @@ const LangCtx = createContext(null)
 
 export function LanguageProvider({ children }) {
   const { user } = useAuth()
-  const [lang, setLangState] = useState(() => localStorage.getItem('lang') || 'en')
+  const [lang, setLangState] = useState(() => (['en','hu'].includes(localStorage.getItem('lang')) ? localStorage.getItem('lang') : 'en'))
 
   // 登录后:本地没选过语言的话,跟随档案里的 preferred_lang
   useEffect(() => {
@@ -18,7 +18,7 @@ export function LanguageProvider({ children }) {
       .eq('auth_user_id', user.id)
       .maybeSingle()
       .then(({ data }) => {
-        if (data?.preferred_lang) setLangState(data.preferred_lang)
+        if (data?.preferred_lang === 'hu') setLangState('hu')
       })
   }, [user])
 

@@ -4,9 +4,8 @@ import { useLang } from '../context/LanguageProvider'
 import { useToast } from '../context/ToastProvider'
 import { fmt } from '../lib/i18n'
 import MemberOverview from '../components/MemberOverview'
+import { useTheme, FONT } from '../context/ThemeProvider'
 
-const serif = { fontFamily: "Georgia,'Noto Serif SC',serif" }
-const panel = { background: '#1f1915', border: '1px solid #32281f', borderRadius: 16, padding: 16 }
 const field = { marginBottom: 8 }
 
 const REWARD_TYPES = ['free_item', 'discount', 'physical']
@@ -23,7 +22,11 @@ const emptyForm = () => ({
    读取所有奖励(含下架),区别于顾客端只读 active。 */
 export default function AdminPage() {
   const { t, lang } = useLang()
+  const { c } = useTheme()
   const toast = useToast()
+  const panel = { background: c.surface, border: `1px solid ${c.line}`, borderRadius: 22, padding: 18 }
+  const inputStyle = { width: '100%', background: c.bg, border: `1px solid ${c.line}`, borderRadius: 10, padding: '10px 12px', color: c.text, fontSize: 15, fontFamily: FONT.body }
+  const iconBtn = { width: 32, height: 32, borderRadius: 8, background: c.bg, color: c.accent, fontSize: 14, border: `1px solid ${c.line}` }
   const [view, setView] = useState('rewards')
   const [rewards, setRewards] = useState([])
   const [form, setForm] = useState(emptyForm())
@@ -89,7 +92,7 @@ export default function AdminPage() {
   }
 
   const inp = (key, ph, opts = {}) => (
-    <input value={form[key]} placeholder={ph} style={field}
+    <input value={form[key]} placeholder={ph} style={{ ...inputStyle, ...field }}
            {...opts}
            onChange={(e) => setForm({ ...form, [key]: e.target.value })} />
   )
@@ -100,9 +103,9 @@ export default function AdminPage() {
         {[['rewards', t.admin.tabRewards], ['members', t.admin.tabMembers]].map(([k, label]) => (
           <button key={k} onClick={() => setView(k)} style={{
             flex: 1, padding: '8px 0', borderRadius: 10, fontSize: 14,
-            fontFamily: "Georgia,serif",
-            background: view === k ? '#c9a14f' : '#2b231c',
-            color: view === k ? '#171210' : '#a89c89',
+            fontFamily: FONT.mono, fontWeight: 700,
+            background: view === k ? c.accent : c.bg,
+            color: view === k ? c.accentInk : c.muted,
           }}>{label}</button>
         ))}
       </div>
@@ -112,42 +115,42 @@ export default function AdminPage() {
       {view === 'rewards' && <>
       {/* 编辑表单 */}
       <div style={panel}>
-        <div style={{ ...serif, fontSize: 15, marginBottom: 12 }}>
+        <div style={{ fontFamily: FONT.display, fontWeight: 700, fontSize: 15, marginBottom: 12 }}>
           {editing ? t.admin.editReward : t.admin.newReward}
         </div>
 
-        <div style={{ fontSize: 12, color: '#a89c89', marginBottom: 4 }}>{t.admin.nameLabel}</div>
+        <div style={{ fontSize: 12, color: c.muted, marginBottom: 4 }}>{t.admin.nameLabel}</div>
         {inp('name_en', 'EN *')}
         {inp('name_hu', 'HU')}
         {inp('name_zh', '中')}
 
-        <div style={{ fontSize: 12, color: '#a89c89', margin: '8px 0 4px' }}>{t.admin.descLabel}</div>
+        <div style={{ fontSize: 12, color: c.muted, margin: '8px 0 4px' }}>{t.admin.descLabel}</div>
         {inp('desc_en', 'EN')}
         {inp('desc_hu', 'HU')}
         {inp('desc_zh', '中')}
 
         <div style={{ display: 'flex', gap: 8, marginTop: 8 }}>
           <div style={{ flex: 1 }}>
-            <div style={{ fontSize: 12, color: '#a89c89', marginBottom: 4 }}>{t.admin.cost}</div>
+            <div style={{ fontSize: 12, color: c.muted, marginBottom: 4 }}>{t.admin.cost}</div>
             {inp('points_cost', '60', { inputMode: 'numeric' })}
           </div>
           <div style={{ flex: 1 }}>
-            <div style={{ fontSize: 12, color: '#a89c89', marginBottom: 4 }}>{t.admin.stock}</div>
+            <div style={{ fontSize: 12, color: c.muted, marginBottom: 4 }}>{t.admin.stock}</div>
             {inp('stock_limit', '∞', { inputMode: 'numeric' })}
           </div>
         </div>
 
         <div style={{ display: 'flex', gap: 8, marginTop: 8 }}>
           <div style={{ flex: 1 }}>
-            <div style={{ fontSize: 12, color: '#a89c89', marginBottom: 4 }}>{t.admin.type}</div>
-            <select value={form.reward_type}
+            <div style={{ fontSize: 12, color: c.muted, marginBottom: 4 }}>{t.admin.type}</div>
+            <select value={form.reward_type} style={inputStyle}
                     onChange={(e) => setForm({ ...form, reward_type: e.target.value })}>
               {REWARD_TYPES.map((rt) => <option key={rt} value={rt}>{t.admin.types[rt]}</option>)}
             </select>
           </div>
           <div style={{ flex: 1 }}>
-            <div style={{ fontSize: 12, color: '#a89c89', marginBottom: 4 }}>{t.admin.minTier}</div>
-            <select value={form.min_tier}
+            <div style={{ fontSize: 12, color: c.muted, marginBottom: 4 }}>{t.admin.minTier}</div>
+            <select value={form.min_tier} style={inputStyle}
                     onChange={(e) => setForm({ ...form, min_tier: e.target.value })}>
               <option value="silver">{t.tiers.silver}</option>
               <option value="jade">{t.tiers.jade}</option>
@@ -164,14 +167,14 @@ export default function AdminPage() {
 
         <div style={{ display: 'flex', gap: 8, marginTop: 12 }}>
           <button onClick={save} disabled={busy} style={{
-            flex: 1, background: '#b8392e', color: '#fff', padding: '10px 0',
-            borderRadius: 10, ...serif, opacity: busy ? 0.6 : 1,
+            flex: 1, background: c.accent, color: c.accentInk, padding: '10px 0',
+            borderRadius: 10, fontFamily: FONT.display, fontWeight: 700, opacity: busy ? 0.6 : 1,
           }}>
             {editing ? t.admin.update : t.admin.create}
           </button>
           {editing && (
             <button onClick={reset} style={{
-              background: '#2b231c', color: '#a89c89', padding: '10px 20px', borderRadius: 10,
+              background: c.bg, color: c.muted, padding: '10px 20px', borderRadius: 10,
             }}>{t.admin.cancel}</button>
           )}
         </div>
@@ -179,16 +182,16 @@ export default function AdminPage() {
 
       {/* 现有目录 */}
       <div style={panel}>
-        <div style={{ ...serif, fontSize: 15, marginBottom: 10 }}>{t.admin.catalog}</div>
+        <div style={{ fontFamily: FONT.display, fontWeight: 700, fontSize: 15, marginBottom: 10 }}>{t.admin.catalog}</div>
         {rewards.map((r) => (
-          <div key={r.id} style={{ padding: '10px 0', borderTop: '1px solid #2b231c' }}>
+          <div key={r.id} style={{ padding: '10px 0', borderTop: `1px solid ${c.lineInner}` }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
               <div style={{ flex: 1 }}>
-                <div style={{ fontSize: 14, color: r.active ? '#ece4d6' : '#6b5f4f' }}>
+                <div style={{ fontSize: 14, color: r.active ? c.text : c.mutedList }}>
                   {r.name?.[lang] || r.name?.en}
-                  {!r.active && <span style={{ fontSize: 11, color: '#6b5f4f' }}> · {t.admin.inactive}</span>}
+                  {!r.active && <span style={{ fontSize: 11, color: c.mutedList }}> · {t.admin.inactive}</span>}
                 </div>
-                <div style={{ fontSize: 12, color: '#a89c89' }}>
+                <div style={{ fontSize: 12, color: c.muted }}>
                   {fmt(r.points_cost)} · {t.admin.types[r.reward_type]}
                   {r.stock_limit != null && ` · ${t.admin.stockLeft(r.stock_limit - r.redeemed_count)}`}
                 </div>
@@ -198,7 +201,7 @@ export default function AdminPage() {
                         style={iconBtn}>{r.active ? '◉' : '○'}</button>
                 <button onClick={() => startEdit(r)} title={t.admin.edit} style={iconBtn}>✎</button>
                 <button onClick={() => remove(r)} title={t.admin.delete}
-                        style={{ ...iconBtn, color: '#b8392e' }}>✕</button>
+                        style={{ ...iconBtn, color: c.accent }}>✕</button>
               </div>
             </div>
           </div>
@@ -209,7 +212,3 @@ export default function AdminPage() {
   )
 }
 
-const iconBtn = {
-  width: 32, height: 32, borderRadius: 8, background: '#2b231c',
-  color: '#c9a14f', fontSize: 14,
-}

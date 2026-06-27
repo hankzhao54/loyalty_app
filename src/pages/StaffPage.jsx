@@ -2,30 +2,33 @@ import { useState } from 'react'
 import { supabase } from '../lib/supabase'
 import { useLang } from '../context/LanguageProvider'
 import { useToast } from '../context/ToastProvider'
+import { useTheme, FONT } from '../context/ThemeProvider'
 import QrScanner from '../components/QrScanner'
 import TodayStats from '../components/TodayStats'
 import { expandShortCode } from '../lib/i18n'
 
-const serif = { fontFamily: "Georgia,'Noto Serif SC',serif" }
-const panel = { background: '#1f1915', border: '1px solid #32281f', borderRadius: 16, padding: 16 }
-const scanBtn = {
-  background: '#2b231c', color: '#c9a14f', padding: '0 16px',
-  borderRadius: 10, whiteSpace: 'nowrap', fontSize: 13,
-  border: '1px solid #c9a14f55',
-}
-
-/* 店员页 v2:扫码或手输录入消费 + 扫码或手输核销兑换券
-   会员码编码的是卡号(LY-...),核销码是 RWD-... */
 export default function StaffPage({ stores, reload }) {
   const { t } = useLang()
+  const { c } = useTheme()
   const toast = useToast()
   const [card, setCard] = useState('')
   const [amount, setAmount] = useState('')
   const [storeId, setStoreId] = useState(stores[0]?.id || '')
   const [code, setCode] = useState('')
   const [busy, setBusy] = useState(false)
-  const [scan, setScan] = useState(null) // 'card' | 'code' | null
-  const [result, setResult] = useState(null) // 录入成功结果卡片
+  const [scan, setScan] = useState(null)
+  const [result, setResult] = useState(null)
+
+  const panel = { background: c.surface, border: `1px solid ${c.line}`, borderRadius: 22, padding: 18 }
+  const inputStyle = {
+    flex: 1, background: c.bg, border: `1px solid ${c.line}`, borderRadius: 12,
+    padding: '11px 13px', color: c.text, fontSize: 15, fontFamily: FONT.body,
+  }
+  const scanBtn = {
+    background: c.bg, color: c.accent, padding: '0 16px', borderRadius: 12,
+    whiteSpace: 'nowrap', fontSize: 13, fontWeight: 600,
+    border: `1px solid ${c.accent}`,
+  }
 
   async function record() {
     if (!card || !amount || !storeId) return
@@ -37,11 +40,7 @@ export default function StaffPage({ stores, reload }) {
       p_lunch: false,
     })
     if (error) toast(error.message)
-    else {
-      setResult(data)
-      setAmount(''); setCard('')
-      await reload()
-    }
+    else { setResult(data); setAmount(''); setCard(''); await reload() }
     setBusy(false)
   }
 
@@ -49,15 +48,13 @@ export default function StaffPage({ stores, reload }) {
     if (!code || !storeId) return
     setBusy(true)
     const { error } = await supabase.rpc('verify_redemption', {
-      p_code: code.trim().toUpperCase(),
-      p_store_id: storeId,
+      p_code: code.trim().toUpperCase(), p_store_id: storeId,
     })
     if (error) toast(error.message)
     else { toast(t.staff.verified); setCode(''); await reload() }
     setBusy(false)
   }
 
-  // 扫到的会员码可能是纯卡号,也可能将来带前缀,这里做个宽松提取
   function handleScan(text) {
     const val = (text || '').trim()
     if (scan === 'card') {
@@ -70,83 +67,86 @@ export default function StaffPage({ stores, reload }) {
     setScan(null)
   }
 
+  const pill = { fontSize: 12, fontWeight: 600, color: c.accentInk, background: c.accent,
+                 padding: '4px 10px', borderRadius: 999 }
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
       <TodayStats />
+
+      {/* 录入结果卡片 */}
       {result && (
-        <div style={{ ...panel, border: '1px solid #7fbf9a55', background: '#16201a' }}>
+        <div style={{ ...panel, borderColor: c.green }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <span style={{ ...serif, fontSize: 15, color: '#7fbf9a' }}>✓ {t.staff.resultTitle}</span>
-            <button onClick={() => setResult(null)}
-                    style={{ color: '#a89c89', fontSize: 13 }}>{t.staff.dismiss}</button>
+            <span style={{ fontSize: 15, fontWeight: 700, color: c.green }}>✓ {t.staff.resultTitle}</span>
+            <button onClick={() => setResult(null)} style={{ color: c.muted, fontSize: 13 }}>{t.staff.dismiss}</button>
           </div>
-          <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, marginTop: 10 }}>
-            <span style={{ ...serif, fontSize: 34, color: '#7fbf9a' }}>+{result.points_earned}</span>
-            <span style={{ fontSize: 13, color: '#a89c89' }}>{t.staff.resultEarned}</span>
+          <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, marginTop: 10, flexWrap: 'wrap' }}>
+            <span style={{ fontFamily: FONT.display, fontWeight: 700, fontSize: 36, color: c.green,
+                           letterSpacing: '-1px' }}>+{result.points_earned}</span>
+            <span style={{ fontSize: 13, color: c.muted }}>{t.staff.resultEarned}</span>
             {result.signup_bonus > 0 && (
-              <span style={{ fontSize: 12, color: '#c9a14f' }}>
+              <span style={{ fontSize: 12, color: c.accent }}>
                 (+{result.signup_bonus} {t.staff.resultSignup})
               </span>
             )}
           </div>
-          <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 6, fontSize: 14 }}>
-            <span style={{ color: '#a89c89' }}>{t.staff.resultBalance}</span>
-            <span style={serif}>{result.new_balance}</span>
+          <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 8, fontSize: 14 }}>
+            <span style={{ color: c.muted }}>{t.staff.resultBalance}</span>
+            <span style={{ fontFamily: FONT.display, fontWeight: 700 }}>{result.new_balance}</span>
           </div>
           <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 4, fontSize: 14 }}>
-            <span style={{ color: '#a89c89' }}>{t.staff.resultTier}</span>
-            <span style={serif}>
+            <span style={{ color: c.muted }}>{t.staff.resultTier}</span>
+            <span style={{ fontWeight: 600 }}>
               {t.tiers[result.tier_after]}
-              {result.tier_upgraded && <span style={{ color: '#c9a14f' }}> · {t.staff.resultUpgrade}</span>}
+              {result.tier_upgraded && <span style={{ color: c.accent }}> · {t.staff.resultUpgrade}</span>}
             </span>
           </div>
           {(result.stamp_completed || result.challenge_completed) && (
-            <div style={{ marginTop: 8, display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-              {result.stamp_completed && (
-                <span style={{ fontSize: 12, color: '#c9a14f', background: '#2b231c',
-                               padding: '4px 10px', borderRadius: 999 }}>{t.staff.resultStampDone}</span>
-              )}
-              {result.challenge_completed && (
-                <span style={{ fontSize: 12, color: '#c9a14f', background: '#2b231c',
-                               padding: '4px 10px', borderRadius: 999 }}>{t.staff.resultChallenge}</span>
-              )}
+            <div style={{ marginTop: 10, display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+              {result.stamp_completed && <span style={pill}>{t.staff.resultStampDone}</span>}
+              {result.challenge_completed && <span style={pill}>{t.staff.resultChallenge}</span>}
             </div>
           )}
         </div>
       )}
+
       {/* 录入消费 */}
       <div style={panel}>
-        <div style={{ ...serif, fontSize: 15, marginBottom: 12 }}>{t.staff.title}</div>
+        <div style={{ fontSize: 15, fontWeight: 700, marginBottom: 12 }}>{t.staff.title}</div>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
           <div style={{ display: 'flex', gap: 8 }}>
-            <input placeholder={t.staff.cardNumber} value={card}
+            <input style={inputStyle} placeholder={t.staff.cardNumber} value={card}
                    onChange={(e) => setCard(e.target.value)} />
             <button onClick={() => setScan('card')} style={scanBtn}>⊞ {t.staff.scan}</button>
           </div>
-          <input placeholder={t.staff.amount} value={amount} inputMode="numeric"
+          <input style={inputStyle} placeholder={t.staff.amount} value={amount} inputMode="numeric"
                  onChange={(e) => setAmount(e.target.value.replace(/\D/g, ''))} />
-          <select value={storeId} onChange={(e) => setStoreId(e.target.value)}>
+          <select value={storeId} onChange={(e) => setStoreId(e.target.value)}
+                  style={{ ...inputStyle, flex: 'none', width: '100%' }}>
             {stores.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
           </select>
           <button onClick={record} disabled={busy} style={{
-            background: '#b8392e', color: '#fff', padding: '12px 0',
-            borderRadius: 12, ...serif, fontSize: 15, opacity: busy ? 0.6 : 1,
+            background: c.accent, color: c.accentInk, padding: '13px 0',
+            borderRadius: 14, fontFamily: FONT.display, fontWeight: 700, fontSize: 15,
+            opacity: busy ? 0.6 : 1,
           }}>
             {t.staff.record}
           </button>
         </div>
       </div>
 
-      {/* 核销兑换券 */}
+      {/* 核销 */}
       <div style={panel}>
-        <div style={{ ...serif, fontSize: 15, marginBottom: 12 }}>{t.staff.verifyTitle}</div>
+        <div style={{ fontSize: 15, fontWeight: 700, marginBottom: 12 }}>{t.staff.verifyTitle}</div>
         <div style={{ display: 'flex', gap: 8 }}>
-          <input placeholder={t.staff.codePlaceholder} value={code}
+          <input style={inputStyle} placeholder={t.staff.codePlaceholder} value={code}
                  onChange={(e) => setCode(e.target.value)} />
           <button onClick={() => setScan('code')} style={scanBtn}>⊞ {t.staff.scan}</button>
           <button onClick={verify} disabled={busy} style={{
-            background: '#c9a14f', color: '#171210', padding: '0 18px',
-            borderRadius: 10, ...serif, whiteSpace: 'nowrap', opacity: busy ? 0.6 : 1,
+            background: c.text, color: c.bg, padding: '0 18px', borderRadius: 12,
+            fontFamily: FONT.display, fontWeight: 700, whiteSpace: 'nowrap',
+            opacity: busy ? 0.6 : 1,
           }}>
             {t.staff.verify}
           </button>
@@ -156,9 +156,7 @@ export default function StaffPage({ stores, reload }) {
       {scan && (
         <QrScanner
           title={scan === 'card' ? t.staff.scanCardTitle : t.staff.scanCodeTitle}
-          onScan={handleScan}
-          onClose={() => setScan(null)}
-        />
+          onScan={handleScan} onClose={() => setScan(null)} />
       )}
     </div>
   )

@@ -3,15 +3,16 @@ import { supabase } from '../lib/supabase'
 import { useLang } from '../context/LanguageProvider'
 import { useToast } from '../context/ToastProvider'
 import { fmt } from '../lib/i18n'
-
-const serif = { fontFamily: "Georgia,'Noto Serif SC',serif" }
-const panel = { background: '#1f1915', border: '1px solid #32281f', borderRadius: 16, padding: 16 }
+import { useTheme, FONT } from '../context/ThemeProvider'
 
 const TIER_COLOR = { silver: '#9aa3ad', jade: '#46b08a', gold: '#d4af37' }
 
 export default function MemberOverview() {
   const { t, lang } = useLang()
+  const { c } = useTheme()
   const toast = useToast()
+  const panel = { background: c.surface, border: `1px solid ${c.line}`, borderRadius: 22, padding: 16 }
+  const inputStyle = { width: '100%', background: c.bg, border: `1px solid ${c.line}`, borderRadius: 12, padding: '11px 13px', color: c.text, fontSize: 15, fontFamily: FONT.body }
   const [rows, setRows] = useState([])
   const [q, setQ] = useState('')
   const [anomOnly, setAnomOnly] = useState(false)
@@ -45,21 +46,21 @@ export default function MemberOverview() {
   const dateStr = (d) => d ? new Date(d).toLocaleDateString(
     lang === 'zh' ? 'zh-CN' : lang === 'hu' ? 'hu-HU' : 'en-GB') : '—'
 
-  if (loading) return <div style={{ ...panel, color: '#a89c89' }}>{t.loading}</div>
+  if (loading) return <div style={{ ...panel, color: c.muted }}>{t.loading}</div>
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-      <input value={q} onChange={(e) => setQ(e.target.value)}
+      <input value={q} onChange={(e) => setQ(e.target.value)} style={inputStyle}
              placeholder={t.admin.searchMember} />
 
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <span style={{ fontSize: 13, color: '#a89c89' }}>
+        <span style={{ fontSize: 13, color: c.muted }}>
           {filtered.length} / {rows.length}
         </span>
         <button onClick={() => setAnomOnly(!anomOnly)} style={{
           fontSize: 12, padding: '4px 10px', borderRadius: 999,
-          background: anomOnly ? '#b8392e' : '#2b231c',
-          color: anomOnly ? '#fff' : (anomalyCount ? '#d98' : '#a89c89'),
+          background: anomOnly ? c.accent : c.bg,
+          color: anomOnly ? c.accentInk : (anomalyCount ? c.danger : c.muted),
         }}>
           {anomOnly ? t.admin.allMembers : `${t.admin.anomaliesOnly}${anomalyCount ? ` (${anomalyCount})` : ''}`}
         </button>
@@ -67,7 +68,7 @@ export default function MemberOverview() {
 
       <div style={panel}>
         {filtered.length === 0 && (
-          <div style={{ color: '#a89c89', fontSize: 13, textAlign: 'center', padding: 12 }}>
+          <div style={{ color: c.muted, fontSize: 13, textAlign: 'center', padding: 12 }}>
             {t.admin.noResults}
           </div>
         )}
@@ -75,24 +76,24 @@ export default function MemberOverview() {
           const hasAnom = m.anomalies && m.anomalies.length
           const open = expanded === m.member_id
           return (
-            <div key={m.member_id} style={{ borderTop: '1px solid #2b231c', padding: '10px 0' }}>
+            <div key={m.member_id} style={{ borderTop: `1px solid ${c.lineInner}`, padding: '10px 0' }}>
               <div onClick={() => setExpanded(open ? null : m.member_id)}
                    style={{ display: 'flex', justifyContent: 'space-between',
                             alignItems: 'center', cursor: 'pointer' }}>
                 <div style={{ minWidth: 0, flex: 1 }}>
                   <div style={{ fontSize: 14, display: 'flex', alignItems: 'center', gap: 6 }}>
-                    {hasAnom && <span style={{ color: '#e06', fontSize: 14 }}>⚠</span>}
+                    {hasAnom && <span style={{ color: c.danger, fontSize: 14 }}>⚠</span>}
                     <span style={{ color: TIER_COLOR[m.tier] }}>●</span>
                     {m.display_name || m.email || m.card_number}
                   </div>
-                  <div style={{ fontSize: 11, color: '#a89c89' }}>
+                  <div style={{ fontSize: 11, color: c.muted }}>
                     {m.card_number} · {dateStr(m.last_activity)}
                   </div>
                 </div>
                 <div style={{ textAlign: 'right', flexShrink: 0 }}>
-                  <div style={{ ...serif, fontSize: 18 }}>{fmt(m.points_balance)}</div>
+                  <div style={{ fontFamily: FONT.display, fontWeight: 700, fontSize: 18 }}>{fmt(m.points_balance)}</div>
                   {m.balance_mismatch !== 0 && (
-                    <div style={{ fontSize: 10, color: '#e06' }}>
+                    <div style={{ fontSize: 10, color: c.danger }}>
                       {t.admin.mismatchNote}: {fmt(m.ledger_balance)}
                     </div>
                   )}
@@ -100,12 +101,12 @@ export default function MemberOverview() {
               </div>
 
               {open && (
-                <div style={{ marginTop: 10, paddingLeft: 8, fontSize: 13, color: '#d8cdbb',
+                <div style={{ marginTop: 10, paddingLeft: 8, fontSize: 13, color: c.text,
                               display: 'flex', flexDirection: 'column', gap: 4 }}>
                   {hasAnom && (
                     <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 6 }}>
                       {m.anomalies.map((a) => (
-                        <span key={a} style={{ fontSize: 11, color: '#fff', background: '#b8392e',
+                        <span key={a} style={{ fontSize: 11, color: c.accentInk, background: c.accent,
                                                padding: '2px 8px', borderRadius: 999 }}>
                           {t.admin.anomalyLabels[a] || a}
                         </span>
@@ -135,7 +136,7 @@ export default function MemberOverview() {
 function Row({ label, val }) {
   return (
     <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-      <span style={{ color: '#a89c89' }}>{label}</span>
+      <span style={{ color: c.muted }}>{label}</span>
       <span>{val}</span>
     </div>
   )
