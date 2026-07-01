@@ -134,6 +134,7 @@ export default function MemberOverview() {
 }
 
 function Row({ label, val }) {
+  const { c } = useTheme()
   return (
     <div style={{ display: 'flex', justifyContent: 'space-between' }}>
       <span style={{ color: c.muted }}>{label}</span>

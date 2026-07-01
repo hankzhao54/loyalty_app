@@ -28,13 +28,13 @@ export default function Login() {
       const { error } = await supabase.auth.signInWithPassword({ email, password })
       if (error) toast(error.message)
     } else {
-      const { data, error } = await supabase.auth.signUp({ email, password })
+      // marketing_optin 通过注册元数据带给后端触发器写入,
+      // 避免"邮箱验证时无 session → RLS 拦截 → 同意被静默丢弃"
+      const { data, error } = await supabase.auth.signUp({
+        email, password,
+        options: { data: { marketing_optin: marketing } },
+      })
       if (error) { toast(error.message); setBusy(false); return }
-      if (data.user) {
-        await supabase.from('members')
-          .update({ marketing_optin: marketing })
-          .eq('auth_user_id', data.user.id)
-      }
       if (!data.session) toast(t.login.checkEmail)
     }
     setBusy(false)
