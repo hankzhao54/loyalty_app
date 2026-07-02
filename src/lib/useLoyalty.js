@@ -4,20 +4,24 @@ import { supabase } from './supabase'
 /* 一次拉齐会员页所需数据;任何写操作完成后调用 reload() */
 export function useLoyalty(user) {
   const [data, setData] = useState({
-    member: null, txs: [], stores: [], rewards: [], redemptions: [],
+    member: null, txs: [], stores: [], rewards: [], rewardsAll: [], redemptions: [],
     campaigns: [], progress: [], config: {}, isStaff: false, isManager: false,
     expiring: 0, expiringDate: null, ready: false,
   })
 
   const reload = useCallback(async () => {
     if (!user) return
-    const [m, st, rw, cf, sf] = await Promise.all([
+    const [m, st, rwAll, cf, sf] = await Promise.all([
       supabase.from('members').select('*').eq('auth_user_id', user.id).maybeSingle(),
       supabase.from('stores').select('*').eq('active', true).order('name'),
-      supabase.from('rewards').select('*').eq('active', true).order('sort_order'),
+      // 拉全量奖励(RLS 允许登录用户读全部):active 的进兑换目录,
+      // 全量用于历史流水 / 待核销券解析名称(即使奖励后来被下架也能显示)
+      supabase.from('rewards').select('*').order('sort_order'),
       supabase.from('config').select('*'),
       supabase.from('staff').select('auth_user_id, role').eq('auth_user_id', user.id).maybeSingle(),
     ])
+    const rewardsAll = rwAll.data || []
+    const rw = { data: rewardsAll.filter((r) => r.active) }
 
     const member = m.data
     let txs = [], redemptions = [], campaigns = [], progress = []
@@ -52,7 +56,7 @@ export function useLoyalty(user) {
 
     const config = Object.fromEntries((cf.data || []).map((r) => [r.key, r.value]))
     setData({
-      member, txs, stores: st.data || [], rewards: rw.data || [],
+      member, txs, stores: st.data || [], rewards: rw.data || [], rewardsAll,
       redemptions, campaigns, progress, config, isStaff: !!sf.data,
       isManager: sf.data?.role === 'manager', expiring, expiringDate, ready: true,
     })

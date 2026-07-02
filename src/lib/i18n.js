@@ -32,8 +32,13 @@ export const T = {
     txChallenge: 'Three-store challenge completed',
     txSpend: (huf, store) => `Purchase ${huf} HUF · ${store}`,
     txRedeem: (name) => `Redeemed · ${name}`,
+    txExpired: 'Points expired',
     toastRedeemed: (name, code) => `"${name}" redeemed · code ${code}`,
     toastNoPoints: 'Not enough points yet — keep going!',
+    toastTierLocked: (tier) => `${tier} members only`,
+    toastSoldOut: 'This reward is out of stock',
+    lockTier: (tier) => `${tier} tier required`,
+    lockSoldOut: 'Out of stock',
     login: {
       title: 'Sign in to 101',
       email: 'Email',
@@ -58,6 +63,7 @@ export const T = {
       cancel: 'Cancel', catalog: 'Current catalog', inactive: 'hidden',
       stockLeft: (n) => `${n} left`, toggle: 'Show/hide', edit: 'Edit', delete: 'Delete',
       saved: 'Saved', deleted: 'Deleted', confirmDelete: 'Delete this reward?',
+      cannotDelete: 'This reward has been redeemed before, so it can’t be deleted — hide it instead.',
       needNameCost: 'Name (EN) and points cost are required',
       tabRewards: 'Rewards', tabMembers: 'Members',
       searchMember: 'Search card / email / phone',
@@ -137,8 +143,13 @@ export const T = {
     txChallenge: 'Három étterem kihívás teljesítve',
     txSpend: (huf, store) => `Vásárlás ${huf} HUF · ${store}`,
     txRedeem: (name) => `Beváltva · ${name}`,
+    txExpired: 'Pontok lejártak',
     toastRedeemed: (name, code) => `„${name}” beváltva · kód: ${code}`,
     toastNoPoints: 'Még nincs elég pont — hajrá!',
+    toastTierLocked: (tier) => `Csak ${tier} tagoknak`,
+    toastSoldOut: 'Ez a jutalom elfogyott',
+    lockTier: (tier) => `${tier} szint szükséges`,
+    lockSoldOut: 'Elfogyott',
     login: {
       title: 'Bejelentkezés a 101-be',
       email: 'E-mail',
@@ -163,6 +174,7 @@ export const T = {
       cancel: 'Mégse', catalog: 'Jelenlegi kínálat', inactive: 'rejtett',
       stockLeft: (n) => `${n} maradt`, toggle: 'Mutat/elrejt', edit: 'Szerkeszt', delete: 'Töröl',
       saved: 'Mentve', deleted: 'Törölve', confirmDelete: 'Törlöd ezt a jutalmat?',
+      cannotDelete: 'Ezt a jutalmat már beváltották, ezért nem törölhető — inkább rejtsd el.',
       needNameCost: 'A név (EN) és a pontköltség kötelező',
       tabRewards: 'Jutalmak', tabMembers: 'Tagok',
       searchMember: 'Keresés: kártya / e-mail / telefon',
@@ -242,8 +254,13 @@ export const T = {
     txChallenge: '三店巡礼挑战完成',
     txSpend: (huf, store) => `消费 ${huf} HUF · ${store}`,
     txRedeem: (name) => `兑换 · ${name}`,
+    txExpired: '积分已过期',
     toastRedeemed: (name, code) => `已兑换「${name}」· 核销码 ${code}`,
     toastNoPoints: '积分不足,继续加油~',
+    toastTierLocked: (tier) => `仅限${tier}会员`,
+    toastSoldOut: '此奖励已售罄',
+    lockTier: (tier) => `需${tier}及以上`,
+    lockSoldOut: '已售罄',
     login: {
       title: '登录 101 会员',
       email: '邮箱',
@@ -268,6 +285,7 @@ export const T = {
       cancel: '取消', catalog: '当前目录', inactive: '已隐藏',
       stockLeft: (n) => `剩 ${n}`, toggle: '上架/下架', edit: '编辑', delete: '删除',
       saved: '已保存', deleted: '已删除', confirmDelete: '确定删除此奖励?',
+      cannotDelete: '该奖励已有兑换记录,无法删除,请改为下架。',
       needNameCost: '名称(EN)和所需积分必填',
       tabRewards: '奖励目录', tabMembers: '会员',
       searchMember: '搜索 卡号 / 邮箱 / 手机',
@@ -327,6 +345,7 @@ export function txLabel(tx, t, lang, stores, rewards) {
     const store = stores.find((s) => s.id === tx.store_id)
     return t.txSpend(fmt(tx.amount_huf), store ? store.name : '')
   }
+  if (tx.type === 'expire' || tx.note === 'points_expired') return t.txExpired
   if (tx.note === 'signup_bonus') return t.txSignupBonus
   if (tx.note === 'stamp_complete') return t.txStampBonus
   if (tx.note === 'challenge_complete') return t.txChallenge

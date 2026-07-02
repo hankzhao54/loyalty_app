@@ -8,7 +8,7 @@ import { fmt, txLabel, formatShortCode } from '../lib/i18n'
 const TIER_ORDER = ['silver', 'jade', 'gold']
 const dateLoc = (lang) => (lang === 'hu' ? 'hu-HU' : 'en-GB')
 
-export default function CardPage({ member, txs, stores, rewards, config, expiring, expiringDate }) {
+export default function CardPage({ member, txs, stores, rewards, rewardsAll, config, expiring, expiringDate }) {
   const { t, lang } = useLang()
   const { c } = useTheme()
   const [qrOpen, setQrOpen] = useState(false)
@@ -115,7 +115,7 @@ export default function CardPage({ member, txs, stores, rewards, config, expirin
                                       borderTop: i === 0 ? 'none' : `1px solid ${c.lineInner}` }}>
               <div style={{ minWidth: 0 }}>
                 <div style={{ fontSize: 14, fontWeight: 600, color: c.text }}>
-                  {txLabel(tx, t, lang, stores, rewards)}
+                  {txLabel(tx, t, lang, stores, rewardsAll || rewards)}
                 </div>
                 <div style={{ fontFamily: FONT.mono, color: c.mutedList, fontSize: 11, marginTop: 2 }}>
                   {new Date(tx.created_at).toLocaleDateString(dateLoc(lang))}

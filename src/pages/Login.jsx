@@ -28,11 +28,11 @@ export default function Login() {
       const { error } = await supabase.auth.signInWithPassword({ email, password })
       if (error) toast(error.message)
     } else {
-      // marketing_optin 通过注册元数据带给后端触发器写入,
-      // 避免"邮箱验证时无 session → RLS 拦截 → 同意被静默丢弃"
+      // 强制同意(agree,上面已拦截必选)与营销同意一并经注册元数据
+      // 带给后端触发器写入,避免"邮箱验证时无 session → RLS 拦截 → 同意被静默丢弃"
       const { data, error } = await supabase.auth.signUp({
         email, password,
-        options: { data: { marketing_optin: marketing } },
+        options: { data: { marketing_optin: marketing, terms_accepted: agree } },
       })
       if (error) { toast(error.message); setBusy(false); return }
       if (!data.session) toast(t.login.checkEmail)

@@ -88,7 +88,10 @@ export default function AdminPage() {
   async function remove(r) {
     if (!window.confirm(t.admin.confirmDelete)) return
     const { error } = await supabase.from('rewards').delete().eq('id', r.id)
-    if (error) toast(error.message); else { toast(t.admin.deleted); load() }
+    if (error) {
+      // 23503 = 外键冲突:该奖励已被 redemptions 引用,改提示下架
+      toast(error.code === '23503' ? t.admin.cannotDelete : error.message)
+    } else { toast(t.admin.deleted); load() }
   }
 
   const inp = (key, ph, opts = {}) => (
