@@ -2,7 +2,7 @@ import { useState } from 'react'
 import QRCodeCanvas from '../components/QRCodeCanvas'
 import QrFullscreen from '../components/QrFullscreen'
 import { useLang } from '../context/LanguageProvider'
-import { useTheme, FONT } from '../context/ThemeProvider'
+import { useTheme, FONT, panelStyle } from '../context/ThemeProvider'
 import { fmt, txLabel, formatShortCode } from '../lib/i18n'
 
 const TIER_ORDER = ['silver', 'jade', 'gold']
@@ -23,7 +23,7 @@ export default function CardPage({ member, txs, stores, rewards, rewardsAll, con
     ? Math.min(100, Math.round(((member.tier_points - curMin) / (nextMin - curMin)) * 100))
     : 100
 
-  const panel = { background: c.surface, border: `1px solid ${c.line}`, borderRadius: 22, padding: 18 }
+  const panel = panelStyle(c)
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>

@@ -68,6 +68,11 @@ export function ThemeProvider({ children }) {
 
 export const useTheme = () => useContext(ThemeCtx)
 
+// 各页面反复重复的卡片容器样式,统一到一处以免视觉逐渐漂移
+export const panelStyle = (c, padding = 18) => ({
+  background: c.surface, border: `1px solid ${c.line}`, borderRadius: 22, padding,
+})
+
 /* 字体常量:Space Grotesk(标题/数字)、Outfit(正文)、Space Mono(ID/日期/代码) */
 export const FONT = {
   display: "'Space Grotesk', system-ui, sans-serif",

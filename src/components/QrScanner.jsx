@@ -15,7 +15,9 @@ export default function QrScanner({ title, onScan, onClose }) {
     const scanner = new Html5Qrcode(elId.current, { verbose: false })
     scannerRef.current = scanner
 
-    scanner
+    // start() 是异步的;若组件在其 pending 期间卸载就直接调用 stop() 会抛错并可能让摄像头
+    // 流不释放,所以卸载时等 start 落定(无论成功/失败)之后再 stop,避免占用摄像头。
+    const started = scanner
       .start(
         { facingMode: 'environment' },
         { fps: 10, qrbox: { width: 230, height: 230 } },
@@ -31,10 +33,9 @@ export default function QrScanner({ title, onScan, onClose }) {
 
     return () => {
       active = false
-      const s = scannerRef.current
-      if (s) {
-        s.stop().then(() => s.clear()).catch(() => {})
-      }
+      started.then(() => {
+        scannerRef.current?.stop().then(() => scannerRef.current.clear()).catch(() => {})
+      })
     }
   }, [])
 

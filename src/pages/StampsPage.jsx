@@ -1,5 +1,5 @@
 import { useLang } from '../context/LanguageProvider'
-import { useTheme, FONT } from '../context/ThemeProvider'
+import { useTheme, FONT, panelStyle } from '../context/ThemeProvider'
 
 const nm = (obj, lang) => obj ? (obj[lang] || obj.en) : ''
 
@@ -12,7 +12,7 @@ export default function StampsPage({ campaigns, progress, stores }) {
   const chalProg = challenge ? progress.find((p) => p.campaign_id === challenge.id) : null
   const visited = new Set(chalProg?.meta?.visited_stores || [])
 
-  const panel = { background: c.surface, border: `1px solid ${c.line}`, borderRadius: 22, padding: 18 }
+  const panel = panelStyle(c)
   const count = stampProg?.count || 0
 
   return (

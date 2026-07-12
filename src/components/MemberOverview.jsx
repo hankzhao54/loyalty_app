@@ -3,7 +3,7 @@ import { supabase } from '../lib/supabase'
 import { useLang } from '../context/LanguageProvider'
 import { useToast } from '../context/ToastProvider'
 import { fmt } from '../lib/i18n'
-import { useTheme, FONT } from '../context/ThemeProvider'
+import { useTheme, FONT, panelStyle } from '../context/ThemeProvider'
 
 const TIER_COLOR = { silver: '#9aa3ad', jade: '#46b08a', gold: '#d4af37' }
 
@@ -11,7 +11,7 @@ export default function MemberOverview() {
   const { t, lang } = useLang()
   const { c } = useTheme()
   const toast = useToast()
-  const panel = { background: c.surface, border: `1px solid ${c.line}`, borderRadius: 22, padding: 16 }
+  const panel = panelStyle(c, 16)
   const inputStyle = { width: '100%', background: c.bg, border: `1px solid ${c.line}`, borderRadius: 12, padding: '11px 13px', color: c.text, fontSize: 15, fontFamily: FONT.body }
   const [rows, setRows] = useState([])
   const [q, setQ] = useState('')
@@ -22,7 +22,7 @@ export default function MemberOverview() {
   useEffect(() => {
     (async () => {
       const { data, error } = await supabase.rpc('admin_member_overview')
-      if (error) toast(error.message)
+      if (error) toast(error.message, 'error')
       else setRows(data || [])
       setLoading(false)
     })()

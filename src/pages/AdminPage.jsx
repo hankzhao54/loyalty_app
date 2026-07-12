@@ -4,7 +4,7 @@ import { useLang } from '../context/LanguageProvider'
 import { useToast } from '../context/ToastProvider'
 import { fmt } from '../lib/i18n'
 import MemberOverview from '../components/MemberOverview'
-import { useTheme, FONT } from '../context/ThemeProvider'
+import { useTheme, FONT, panelStyle } from '../context/ThemeProvider'
 
 const field = { marginBottom: 8 }
 
@@ -24,7 +24,7 @@ export default function AdminPage() {
   const { t, lang } = useLang()
   const { c } = useTheme()
   const toast = useToast()
-  const panel = { background: c.surface, border: `1px solid ${c.line}`, borderRadius: 22, padding: 18 }
+  const panel = panelStyle(c)
   const inputStyle = { width: '100%', background: c.bg, border: `1px solid ${c.line}`, borderRadius: 10, padding: '10px 12px', color: c.text, fontSize: 15, fontFamily: FONT.body }
   const iconBtn = { width: 32, height: 32, borderRadius: 8, background: c.bg, color: c.accent, fontSize: 14, border: `1px solid ${c.line}` }
   const [view, setView] = useState('rewards')
@@ -75,23 +75,27 @@ export default function AdminPage() {
       ({ error } = await supabase.from('rewards').insert(payload))
     }
     setBusy(false)
-    if (error) { toast(error.message); return }
-    toast(t.admin.saved)
+    if (error) { toast(error.message, 'error'); return }
+    toast(t.admin.saved, 'success')
     reset(); load()
   }
 
   async function toggleActive(r) {
+    setBusy(true)
     const { error } = await supabase.from('rewards').update({ active: !r.active }).eq('id', r.id)
-    if (error) toast(error.message); else load()
+    setBusy(false)
+    if (error) toast(error.message, 'error'); else load()
   }
 
   async function remove(r) {
     if (!window.confirm(t.admin.confirmDelete)) return
+    setBusy(true)
     const { error } = await supabase.from('rewards').delete().eq('id', r.id)
+    setBusy(false)
     if (error) {
       // 23503 = 外键冲突:该奖励已被 redemptions 引用,改提示下架
-      toast(error.code === '23503' ? t.admin.cannotDelete : error.message)
-    } else { toast(t.admin.deleted); load() }
+      toast(error.code === '23503' ? t.admin.cannotDelete : error.message, 'error')
+    } else { toast(t.admin.deleted, 'success'); load() }
   }
 
   const inp = (key, ph, opts = {}) => (
@@ -200,11 +204,12 @@ export default function AdminPage() {
                 </div>
               </div>
               <div style={{ display: 'flex', gap: 6, flexShrink: 0 }}>
-                <button onClick={() => toggleActive(r)} title={t.admin.toggle}
-                        style={iconBtn}>{r.active ? '◉' : '○'}</button>
-                <button onClick={() => startEdit(r)} title={t.admin.edit} style={iconBtn}>✎</button>
-                <button onClick={() => remove(r)} title={t.admin.delete}
-                        style={{ ...iconBtn, color: c.accent }}>✕</button>
+                <button onClick={() => toggleActive(r)} disabled={busy} title={t.admin.toggle}
+                        aria-label={t.admin.toggle} style={iconBtn}>{r.active ? '◉' : '○'}</button>
+                <button onClick={() => startEdit(r)} title={t.admin.edit}
+                        aria-label={t.admin.edit} style={iconBtn}>✎</button>
+                <button onClick={() => remove(r)} disabled={busy} title={t.admin.delete}
+                        aria-label={t.admin.delete} style={{ ...iconBtn, color: c.accent }}>✕</button>
               </div>
             </div>
           </div>

@@ -5,7 +5,7 @@ import { useLang } from '../context/LanguageProvider'
 import { useTheme, FONT } from '../context/ThemeProvider'
 import { fmt } from '../lib/i18n'
 
-export default function TodayStats() {
+export default function TodayStats({ refreshKey }) {
   const { user } = useAuth()
   const { t } = useLang()
   const { c } = useTheme()
@@ -28,7 +28,7 @@ export default function TodayStats() {
         verified: (ver.data || []).length,
       })
     })()
-  }, [user])
+  }, [user, refreshKey])
 
   const cell = (label, val) => (
     <div style={{ flex: 1, textAlign: 'center' }}>

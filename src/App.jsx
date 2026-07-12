@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { lazy, Suspense, useState } from 'react'
 import { AuthProvider, useAuth } from './context/AuthProvider'
 import { LanguageProvider, useLang } from './context/LanguageProvider'
 import { ToastProvider } from './context/ToastProvider'
@@ -9,8 +9,10 @@ import Login from './pages/Login'
 import CardPage from './pages/CardPage'
 import RewardsPage from './pages/RewardsPage'
 import StampsPage from './pages/StampsPage'
-import StaffPage from './pages/StaffPage'
-import AdminPage from './pages/AdminPage'
+
+// 店员/管理端含扫码库(html5-qrcode,体积较大),普通会员用不到,懒加载避免拖慢首屏
+const StaffPage = lazy(() => import('./pages/StaffPage'))
+const AdminPage = lazy(() => import('./pages/AdminPage'))
 
 // 底部导航标签固定英文(设计稿规范)
 const NAV_LABEL = { card: 'Card', rewards: 'Rewards', stamps: 'Stamps', staff: 'Staff', admin: 'Admin' }
@@ -72,8 +74,16 @@ function Shell() {
         {active === 'card'    && <CardPage {...data} />}
         {active === 'rewards' && <RewardsPage {...data} />}
         {active === 'stamps'  && <StampsPage {...data} />}
-        {active === 'staff'   && <StaffPage {...data} />}
-        {active === 'admin'   && <AdminPage />}
+        {active === 'staff'   && (
+          <Suspense fallback={<div style={{ color: c.muted }}>{t.loading}</div>}>
+            <StaffPage {...data} />
+          </Suspense>
+        )}
+        {active === 'admin'   && (
+          <Suspense fallback={<div style={{ color: c.muted }}>{t.loading}</div>}>
+            <AdminPage />
+          </Suspense>
+        )}
       </main>
 
       <nav style={{ position: 'fixed', bottom: 0, left: '50%', transform: 'translateX(-50%)',
