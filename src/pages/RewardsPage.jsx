@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { supabase } from '../lib/supabase'
 import { useLang } from '../context/LanguageProvider'
 import { useToast } from '../context/ToastProvider'
-import { useTheme, FONT } from '../context/ThemeProvider'
+import { useTheme, FONT, panelStyle } from '../context/ThemeProvider'
 import { fmt } from '../lib/i18n'
 
 const nm = (obj, lang) => obj ? (obj[lang] || obj.en) : ''
@@ -10,7 +10,7 @@ const TIER_RANK = { silver: 1, jade: 2, gold: 3 }
 const inStock = (r) => r.stock_limit == null || r.redeemed_count < r.stock_limit
 const tierOk = (member, r) => TIER_RANK[member.tier] >= TIER_RANK[r.min_tier]
 
-export default function RewardsPage({ member, rewards, rewardsAll = [], redemptions, reload }) {
+export default function RewardsPage({ member, rewards, rewardsAll = [], redemptions, reloadMember }) {
   const { t, lang } = useLang()
   const { c } = useTheme()
   const toast = useToast()
@@ -31,14 +31,14 @@ export default function RewardsPage({ member, rewards, rewardsAll = [], redempti
           : msg,
         'error'
       )
-    } else { toast(t.toastRedeemed(nm(r.name, lang), data.code), 'success'); await reload() }
+    } else { toast(t.toastRedeemed(nm(r.name, lang), data.code), 'success'); await reloadMember() }
     setBusy(false)
   }
 
   // 券名解析用全量奖励表(含已下架),回退到 active 目录
   const nameSource = rewardsAll.length ? rewardsAll : rewards
 
-  const panel = { background: c.surface, border: `1px solid ${c.line}`, borderRadius: 22, padding: 18 }
+  const panel = panelStyle(c)
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>

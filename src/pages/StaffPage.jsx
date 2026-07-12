@@ -2,12 +2,12 @@ import { useState } from 'react'
 import { supabase } from '../lib/supabase'
 import { useLang } from '../context/LanguageProvider'
 import { useToast } from '../context/ToastProvider'
-import { useTheme, FONT } from '../context/ThemeProvider'
+import { useTheme, FONT, panelStyle } from '../context/ThemeProvider'
 import QrScanner from '../components/QrScanner'
 import TodayStats from '../components/TodayStats'
 import { expandShortCode } from '../lib/i18n'
 
-export default function StaffPage({ stores, reload }) {
+export default function StaffPage({ stores }) {
   const { t } = useLang()
   const { c } = useTheme()
   const toast = useToast()
@@ -18,8 +18,9 @@ export default function StaffPage({ stores, reload }) {
   const [busy, setBusy] = useState(false)
   const [scan, setScan] = useState(null)
   const [result, setResult] = useState(null)
+  const [statsKey, setStatsKey] = useState(0)
 
-  const panel = { background: c.surface, border: `1px solid ${c.line}`, borderRadius: 22, padding: 18 }
+  const panel = panelStyle(c)
   const inputStyle = {
     flex: 1, background: c.bg, border: `1px solid ${c.line}`, borderRadius: 12,
     padding: '11px 13px', color: c.text, fontSize: 15, fontFamily: FONT.body,
@@ -40,7 +41,7 @@ export default function StaffPage({ stores, reload }) {
       p_lunch: false,
     })
     if (error) toast(error.message, 'error')
-    else { setResult(data); setAmount(''); setCard(''); await reload() }
+    else { setResult(data); setAmount(''); setCard(''); setStatsKey((k) => k + 1) }
     setBusy(false)
   }
 
@@ -51,7 +52,7 @@ export default function StaffPage({ stores, reload }) {
       p_code: code.trim().toUpperCase(), p_store_id: storeId,
     })
     if (error) toast(error.message, 'error')
-    else { toast(t.staff.verified, 'success'); setCode(''); await reload() }
+    else { toast(t.staff.verified, 'success'); setCode(''); setStatsKey((k) => k + 1) }
     setBusy(false)
   }
 
@@ -72,7 +73,7 @@ export default function StaffPage({ stores, reload }) {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-      <TodayStats />
+      <TodayStats refreshKey={statsKey} />
 
       {/* 录入结果卡片 */}
       {result && (

@@ -22,11 +22,11 @@ export default function Login() {
 
   async function submit() {
     if (!email || !password) return
-    if (mode === 'signup' && !agree) { toast(t.login.mustAgree); return }
+    if (mode === 'signup' && !agree) { toast(t.login.mustAgree, 'error'); return }
     setBusy(true)
     if (mode === 'signin') {
       const { error } = await supabase.auth.signInWithPassword({ email, password })
-      if (error) toast(error.message)
+      if (error) toast(error.message, 'error')
     } else {
       // 强制同意(agree,上面已拦截必选)与营销同意一并经注册元数据
       // 带给后端触发器写入,避免"邮箱验证时无 session → RLS 拦截 → 同意被静默丢弃"
@@ -34,8 +34,8 @@ export default function Login() {
         email, password,
         options: { data: { marketing_optin: marketing, terms_accepted: agree } },
       })
-      if (error) { toast(error.message); setBusy(false); return }
-      if (!data.session) toast(t.login.checkEmail)
+      if (error) { toast(error.message, 'error'); setBusy(false); return }
+      if (!data.session) toast(t.login.checkEmail, 'success')
     }
     setBusy(false)
   }
