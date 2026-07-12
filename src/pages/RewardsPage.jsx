@@ -17,9 +17,9 @@ export default function RewardsPage({ member, rewards, rewardsAll = [], redempti
   const [busy, setBusy] = useState(false)
 
   async function redeem(r) {
-    if (member.points_balance < r.points_cost) { toast(t.toastNoPoints); return }
-    if (!tierOk(member, r)) { toast(t.toastTierLocked(t.tiers[r.min_tier])); return }
-    if (!inStock(r)) { toast(t.toastSoldOut); return }
+    if (member.points_balance < r.points_cost) { toast(t.toastNoPoints, 'error'); return }
+    if (!tierOk(member, r)) { toast(t.toastTierLocked(t.tiers[r.min_tier]), 'error'); return }
+    if (!inStock(r)) { toast(t.toastSoldOut, 'error'); return }
     setBusy(true)
     const { data, error } = await supabase.rpc('redeem_reward', { p_reward_id: r.id })
     if (error) {
@@ -28,9 +28,10 @@ export default function RewardsPage({ member, rewards, rewardsAll = [], redempti
         msg.includes('insufficient') ? t.toastNoPoints
           : msg.includes('tier too low') ? t.toastTierLocked(t.tiers[r.min_tier])
           : msg.includes('out of stock') ? t.toastSoldOut
-          : msg
+          : msg,
+        'error'
       )
-    } else { toast(t.toastRedeemed(nm(r.name, lang), data.code)); await reload() }
+    } else { toast(t.toastRedeemed(nm(r.name, lang), data.code), 'success'); await reload() }
     setBusy(false)
   }
 

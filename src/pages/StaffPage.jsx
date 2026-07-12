@@ -39,7 +39,7 @@ export default function StaffPage({ stores, reload }) {
       p_store_id: storeId,
       p_lunch: false,
     })
-    if (error) toast(error.message)
+    if (error) toast(error.message, 'error')
     else { setResult(data); setAmount(''); setCard(''); await reload() }
     setBusy(false)
   }
@@ -50,8 +50,8 @@ export default function StaffPage({ stores, reload }) {
     const { error } = await supabase.rpc('verify_redemption', {
       p_code: code.trim().toUpperCase(), p_store_id: storeId,
     })
-    if (error) toast(error.message)
-    else { toast(t.staff.verified); setCode(''); await reload() }
+    if (error) toast(error.message, 'error')
+    else { toast(t.staff.verified, 'success'); setCode(''); await reload() }
     setBusy(false)
   }
 
