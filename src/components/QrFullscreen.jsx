@@ -22,7 +22,7 @@ export default function QrFullscreen({ cardNumber, onClose }) {
   )
 
   return (
-    <div onClick={onClose} style={{
+    <div onClick={onClose} className="modal-enter" style={{
       position: 'fixed', inset: 0, zIndex: 70, background: '#fff',
       display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
       gap: 24, padding: 24, cursor: 'pointer',

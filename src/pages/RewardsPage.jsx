@@ -87,7 +87,8 @@ export default function RewardsPage({ member, rewards, rewardsAll = [], redempti
               : null
             return (
               <div key={r.id} style={{ ...panel, display: 'flex', justifyContent: 'space-between',
-                                       alignItems: 'center', gap: 12, opacity: (!stock || !tier) ? 0.6 : 1 }}>
+                                       alignItems: 'center', gap: 12, opacity: (!stock || !tier) ? 0.6 : 1,
+                                       transition: 'opacity 200ms ease' }}>
                 <div style={{ minWidth: 0 }}>
                   <div style={{ fontSize: 15, fontWeight: 600 }}>{nm(r.name, lang)}</div>
                   {r.description && (
@@ -103,6 +104,7 @@ export default function RewardsPage({ member, rewards, rewardsAll = [], redempti
                   padding: '8px 16px', borderRadius: 999, flexShrink: 0,
                   fontFamily: FONT.display, fontWeight: 700, fontSize: 13,
                   whiteSpace: 'nowrap', opacity: busy ? 0.6 : 1,
+                  transition: 'background-color 200ms ease, color 200ms ease, opacity 200ms ease, transform 160ms var(--ease-out)',
                 }}>
                   {t.ptsBtn(r.points_cost)}
                 </button>

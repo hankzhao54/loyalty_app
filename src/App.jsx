@@ -69,11 +69,14 @@ function Shell() {
         paddingLeft: 'max(22px, env(safe-area-inset-left))',
         paddingRight: 'max(22px, env(safe-area-inset-right))',
         paddingTop: 6, paddingBottom: 90 }}>
-        {active === 'card'    && <CardPage {...data} />}
-        {active === 'rewards' && <RewardsPage {...data} />}
-        {active === 'stamps'  && <StampsPage {...data} />}
-        {active === 'staff'   && <StaffPage {...data} />}
-        {active === 'admin'   && <AdminPage />}
+        {/* key 变化触发轻微淡入上浮,避免内容硬切 */}
+        <div key={active} className="page-enter">
+          {active === 'card'    && <CardPage {...data} />}
+          {active === 'rewards' && <RewardsPage {...data} />}
+          {active === 'stamps'  && <StampsPage {...data} />}
+          {active === 'staff'   && <StaffPage {...data} />}
+          {active === 'admin'   && <AdminPage />}
+        </div>
       </main>
 
       <nav style={{ position: 'fixed', bottom: 0, left: '50%', transform: 'translateX(-50%)',
@@ -92,8 +95,9 @@ function Shell() {
               fontWeight: on ? 700 : 400,
               color: on ? c.text : c.muted,
               display: 'flex', alignItems: 'center', justifyContent: 'center',
-              paddingBottom: on ? 3 : 5, paddingTop: 5,
+              paddingBottom: 5, paddingTop: 5,
               borderBottom: on ? `2px solid ${c.accent}` : '2px solid transparent',
+              transition: 'color 150ms ease, border-color 150ms ease, transform 160ms var(--ease-out)',
             }}>
               {NAV_LABEL[k]}
             </button>

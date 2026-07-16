@@ -69,7 +69,7 @@ export default function CardPage({ member, txs, stores, rewards, rewardsAll, con
             </div>
             <div style={{ fontSize: 11, color: c.cardMuted, marginTop: 2 }}>{t.showCode}</div>
           </div>
-          <div onClick={() => setQrOpen(true)}
+          <div onClick={() => setQrOpen(true)} className="pressable"
                style={{ background: '#fff', borderRadius: 12, padding: 7,
                         cursor: 'pointer', flexShrink: 0 }}>
             <QRCodeCanvas value={member.card_number} size={88} />
@@ -96,7 +96,8 @@ export default function CardPage({ member, txs, stores, rewards, rewardsAll, con
         <div style={{ height: 8, borderRadius: 8, marginTop: 10,
                       background: c.line, overflow: 'hidden' }}>
           <div style={{ height: '100%', borderRadius: 8, width: pct + '%',
-                        background: c.accent, transition: 'width .5s' }} />
+                        background: c.accent,
+                        transition: 'width 600ms var(--ease-out)' }} />
         </div>
         <div style={{ fontSize: 12, color: c.muted, marginTop: 8 }}>
           {nextId

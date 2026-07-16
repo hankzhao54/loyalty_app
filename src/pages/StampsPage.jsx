@@ -33,7 +33,8 @@ export default function StampsPage({ campaigns, progress, stores }) {
             {Array.from({ length: stamp.required_count }).map((_, i) => {
               const filled = i < count
               return (
-                <div key={i} style={{
+                <div key={i} className="stagger-in" style={{
+                  animationDelay: `${i * 40}ms`,
                   aspectRatio: '1', borderRadius: '50%',
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
                   fontFamily: FONT.display, fontWeight: 700, fontSize: 18,

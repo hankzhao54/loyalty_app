@@ -14,7 +14,8 @@ export function LangSwitch() {
           <button key={k} onClick={() => setLang(k)} style={{
             fontFamily: FONT.mono, fontSize: 11, fontWeight: 700, letterSpacing: 0.5,
             padding: '5px 9px', background: on ? c.accent : 'transparent',
-            color: on ? c.accentInk : c.muted, transition: 'background .2s, color .2s',
+            color: on ? c.accentInk : c.muted,
+            transition: 'background-color 200ms ease, color 200ms ease, transform 160ms var(--ease-out)',
           }}>{k.toUpperCase()}</button>
         )
       })}
@@ -33,7 +34,7 @@ export function ThemeToggle() {
       <span style={{
         position: 'absolute', top: 3, left: 3, width: 22, height: 22, borderRadius: '50%',
         background: c.accent, transform: dark ? 'translateX(22px)' : 'translateX(0)',
-        transition: 'transform .3s ease', display: 'flex',
+        transition: 'transform 300ms var(--ease-drawer)', display: 'flex',
         alignItems: 'center', justifyContent: 'center',
       }}>
         {dark ? (

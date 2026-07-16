@@ -1,10 +1,79 @@
 * { box-sizing: border-box; margin: 0; padding: 0; }
 html, body, #root { height: 100%; }
+
+/* 自定义缓动曲线(emil-design-eng skill):内置 ease 太弱 */
+:root {
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
+  --ease-drawer: cubic-bezier(0.32, 0.72, 0, 1);
+}
+
 body {
   font-family: 'Outfit', 'Noto Sans SC', -apple-system, BlinkMacSystemFont, sans-serif;
   -webkit-font-smoothing: antialiased;
   transition: background-color .35s ease, color .35s ease;
 }
 input, select, button { font: inherit; color: inherit; }
-button { cursor: pointer; border: none; background: none; }
+
+/* 所有按钮:按压缩放反馈(scale 0.97,160ms ease-out) */
+button {
+  cursor: pointer; border: none; background: none;
+  transition: transform 160ms var(--ease-out);
+}
+button:active:not(:disabled) { transform: scale(0.97); }
+
+/* 非 button 的可按元素(如二维码块) */
+.pressable { transition: transform 160ms var(--ease-out); }
+.pressable:active { transform: scale(0.96); }
+
 input:focus, select:focus, button:focus-visible { outline: 2px solid #FF5630; outline-offset: 1px; }
+
+/* 页面切换:轻微上浮淡入(200ms,足够克制,Tab 高频使用) */
+.page-enter { animation: page-in 200ms var(--ease-out) both; }
+@keyframes page-in {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Toast:用 transition(可中断、可重定向),@starting-style 做入场 */
+.toast {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+  transition: opacity 250ms var(--ease-out), transform 250ms var(--ease-out);
+}
+@starting-style {
+  .toast { opacity: 0; transform: translateY(-12px) scale(0.97); }
+}
+/* 退场比入场快(200ms) */
+.toast[data-leaving='true'] {
+  opacity: 0;
+  transform: translateY(-8px) scale(0.98);
+  transition-duration: 200ms;
+}
+
+/* 模态/全屏层:淡入 + 从 scale(0.98) 进场(绝不从 scale(0) 开始) */
+.modal-enter {
+  opacity: 1;
+  transform: scale(1);
+  transition: opacity 200ms var(--ease-out), transform 200ms var(--ease-out);
+}
+@starting-style {
+  .modal-enter { opacity: 0; transform: scale(0.98); }
+}
+
+/* 列表交错入场(每项延迟由 inline animationDelay 控制,30-80ms) */
+.stagger-in {
+  opacity: 0;
+  transform: translateY(6px);
+  animation: fade-up 300ms var(--ease-out) forwards;
+}
+@keyframes fade-up {
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* 减弱动效:去位移,保留透明度/颜色过渡 */
+@media (prefers-reduced-motion: reduce) {
+  .page-enter, .stagger-in { animation: none; opacity: 1; transform: none; }
+  .toast, .modal-enter { transition: opacity 200ms ease; transform: none; }
+  button:active:not(:disabled), .pressable:active { transform: none; }
+}
